@@ -1,1 +1,1 @@
-# ecommerse-scam-detector
+# ecommerce-scam-detector
