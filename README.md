@@ -1,4 +1,4 @@
-# ecommerse-scam-detector
+# ecommerce-scam-detector
 
 ## Development setup
 - Install web-ext: `npm install --global web-ext`
