@@ -4,6 +4,7 @@
     "version": "1.0",
     "background": {
         "scripts": [
+            "./node_modules/webextension-polyfill/dist/browser-polyfill.js",
             "background.js"
         ]
     },
