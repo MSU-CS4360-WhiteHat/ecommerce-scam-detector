@@ -1,3 +1,24 @@
+// Arbitrary numbers, we should adjust them as needed.
+const Risk = {
+    HIGH: 3,
+    MED: 2,
+    LOW: 1,
+    UNKNOWN: 0
+}
+
+// https://stackoverflow.com/questions/34818020/javascript-regex-url-extract-domain-only
+function domain_from_url(url) {
+    var result
+    var match
+    if (match = url.match(/^(?:https?:\/\/)?(?:[^@\n]+@)?(?:www\.)?([^:\/\n\?\=]+)/im)) {
+        result = match[1]
+        if (match = result.match(/^[^\.]+\.(.+\..+)$/)) {
+            result = match[1]
+        }
+    }
+    return result
+}
+
 
 // Called when the user clicks on the extension's icon.
 browser.browserAction.onClicked.addListener(function (tab) {
@@ -7,27 +28,32 @@ browser.browserAction.onClicked.addListener(function (tab) {
 // Called before the Navigation occurs.
 browser.webNavigation.onBeforeNavigate.addListener(function(details) {
 
-    // Consider stopping page load and asking the user if they wish to continue.
-    
-    // Consider a way to use the data to make a hash tag to see if the site has change,
-    //      if so, then scan again.
+    // Consider moving this to onCompleted if onBefore is never used.
+    const domain = domain_from_url(details.url);
+    const riskStatus = localStorage.getItem(domain);
 
-    if(!localStorage.getItem('scanned_site')){
-        console.log("Make initial site scans.")
-
-        // TODO Add initial site data to determine if we should scan the site again.
-        localStorage.setItem('scanned_site', JSON.stringify({'ts': details.timeStamp,  'site':details.url}));
+    if(riskStatus == Risk.HIGH){
+        // Consider stopping page load and asking the user if they wish to continue 
+        // if we deep scan here and find some oddities. 
+        console.log("Risk is HIGH")
+    }else if(!riskStatus){
+        // Consider a please wait while we check if the site is safe?
+        // Deep scan here.
+        //  If this causes a huge latency before page load, we can move it to onCompleted.
+        
+        console.log("Site "+domain+" has not been scanned, scanning now.")
+        // TODO replace with an method call to the application service.
+        // e.g. const riskResults = someApiFunctionCall() ?? Risk.UNKNOWN
+        const riskResults = Risk.UNKNOWN 
+        localStorage.setItem(domain, riskResults);
+    }else{
+        // TODO Debugging else, remove.
+        console.log("Site "+domain+" has already been scanned--do nothing")
     }
-
 });
 
 // Called when the user navigates to a new page.
 browser.webNavigation.onCompleted.addListener(function (details) {
-    // Look at local storage
-    // If URL exists--and the hash has not changes, do not run API requests.
-    
-    // TODO add in deep scan web APIs
-
     console.log("Navigated to: " + details.url);
 });
 
