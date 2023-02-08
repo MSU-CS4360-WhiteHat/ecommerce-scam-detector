@@ -4,7 +4,8 @@
   "description": "A ecommerce-scam-detector",
   "main": "background.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "safari-build": "xcrun safari-web-extension-converter ."
   },
   "repository": {
     "type": "git",
