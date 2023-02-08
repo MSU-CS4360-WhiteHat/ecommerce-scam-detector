@@ -2,6 +2,7 @@
     "manifest_version": 2,
     "name": "Ecommerse Scam Detector",
     "version": "1.0",
+    "description": "An extension that tries to deted if a website is a scam or not",
     "background": {
         "scripts": [
             "./node_modules/webextension-polyfill/dist/browser-polyfill.js",
@@ -12,6 +13,10 @@
         "webNavigation",
         "tabs"
     ],
+    "host_permissions":[
+        "https://*/*"
+    ]
+    ,
     "icons": {
         "38": "/icons/red-circle.png"
     },
