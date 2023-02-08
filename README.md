@@ -1,4 +1,6 @@
-# ecommerce-scam-detector
+# Ecommerce Scam Detector
+
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=MSU-CS4360-WhiteHat_ecommerce-scam-detector&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=MSU-CS4360-WhiteHat_ecommerce-scam-detector)
 
 ## Development setup
 
