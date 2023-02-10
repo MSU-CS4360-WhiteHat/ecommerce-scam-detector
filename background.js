@@ -23,11 +23,21 @@ function domain_from_url(url) {
   return result;
 }
 
-// Called when the user clicks on the extension's icon.
+// Opens a dropdown menu when the extension is clicked
 browser.browserAction.onClicked.addListener(function (tab) {
-  toggleIcon();
+  console.log("extension clicked")
+  browser.browserAction.setPopup({
+    popup: "popup.html"
+  });
 });
 
+// Listens for what color is chosen from the drowpdown and changes extension icon
+browser.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+  if (request.color) {
+    setIcon(request.color);
+  }
+});
+  
 // Called before the Navigation occurs.
 browser.webNavigation.onBeforeNavigate.addListener(function (details) {
   // Consider moving this to onCompleted if onBefore is never used.
@@ -58,20 +68,6 @@ browser.webNavigation.onBeforeNavigate.addListener(function (details) {
 browser.webNavigation.onCompleted.addListener(function (details) {
   console.log("Navigated to: " + details.url);
 });
-
-// Temp Code for testing the toggleIcon function
-let color = "red";
-function toggleIcon() {
-  if (color === "red") {
-    color = "yellow";
-  } else if (color === "yellow") {
-    color = "green";
-  } else {
-    color = "red";
-  }
-
-  setIcon(color);
-}
 
 // Sets the extension's icon to the specified color.
 // Available colors: "red", "yellow", "green"
