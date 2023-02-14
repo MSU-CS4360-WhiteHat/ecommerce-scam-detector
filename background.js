@@ -6,21 +6,8 @@ const Risk = {
   UNKNOWN: 0,
 };
 
-// https://stackoverflow.com/questions/34818020/javascript-regex-url-extract-domain-only
 function domain_from_url(url) {
-  var result;
-  var match;
-  if (
-    (match = url.match(
-      /^(?:https?:\/\/)?(?:[^@\n]+@)?(?:www\.)?([^:\/\n\?\=]+)/im
-    ))
-  ) {
-    result = match[1];
-    if ((match = result.match(/^[^\.]+\.(.+\..+)$/))) {
-      result = match[1];
-    }
-  }
-  return result;
+  return url.split('/')[2];
 }
 
 // Called when the user clicks on the extension's icon.
@@ -32,6 +19,12 @@ browser.browserAction.onClicked.addListener(function (tab) {
 browser.webNavigation.onBeforeNavigate.addListener(function (details) {
   // Consider moving this to onCompleted if onBefore is never used.
   const domain = domain_from_url(details.url);
+
+  if(!domain){
+    // No domain found, so just return.
+    return 1;
+  }
+
   const riskStatus = localStorage.getItem(domain);
 
   if (riskStatus == Risk.HIGH) {
