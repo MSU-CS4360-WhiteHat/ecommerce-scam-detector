@@ -1,5 +1,7 @@
 # ecommerce-scam-detector
 
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=MSU-CS4360-WhiteHat_ecommerce-scam-detector&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=MSU-CS4360-WhiteHat_ecommerce-scam-detector)[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=MSU-CS4360-WhiteHat_ecommerce-scam-detector&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=MSU-CS4360-WhiteHat_ecommerce-scam-detector)[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=MSU-CS4360-WhiteHat_ecommerce-scam-detector&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=MSU-CS4360-WhiteHat_ecommerce-scam-detector)[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=MSU-CS4360-WhiteHat_ecommerce-scam-detector&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=MSU-CS4360-WhiteHat_ecommerce-scam-detector)[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=MSU-CS4360-WhiteHat_ecommerce-scam-detector&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=MSU-CS4360-WhiteHat_ecommerce-scam-detector)[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=MSU-CS4360-WhiteHat_ecommerce-scam-detector&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=MSU-CS4360-WhiteHat_ecommerce-scam-detector)
+
 ## Development setup
 
 - Install web-ext: `npm install`
