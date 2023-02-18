@@ -9,6 +9,7 @@
   - Dev Tool: Navigate to `about:debugging` and click `This Firefox` then `Inspect` to open the developer tools for the extension
 - Run `npx web-ext run -t chromium` to start the extension in a new Chromium instance
   - Dev Tool: Navigate to `chrome://extensions` and toggle `Developer mode` then click `Inspect views: background page` to open the developer tools for the extension
+- For debugging use the commands listed above but add the option `--devtools`. This will automatically bring up the developers console.
 
 ## Safari Developoment setup
 

@@ -1,0 +1,41 @@
+h1{
+    color:tomato;
+}
+
+.container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.backdrop {
+    background-color: black;
+    z-index: 100000;
+    opacity: 0.75;
+    min-height: 100vh;
+    min-width: 100vw;
+}
+
+.top-container{
+    z-index: 100001;
+    background-color: whitesmoke;
+    max-width:75vw;
+    max-height: 90vh;
+    min-height: 50vh;
+    border-radius: 0 0 10px 10px ;
+    margin: 0 auto;
+    overflow:scroll;
+    border: 1mm solid orangered;
+    border-top: 0;
+}
+
+.stop-scrolling {
+    height: 100vw;
+    overflow: hidden;
+}
