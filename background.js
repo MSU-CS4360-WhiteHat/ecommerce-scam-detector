@@ -49,7 +49,7 @@ browser.webNavigation.onCompleted.addListener(function (details) {
   console.log("Getting data from local storage for: " + domain);
 
   const data = localStorage.getItem(domain);
-
+  
   if (data) {
     console.log("Site " + domain + " has already been scanned");
     console.log("Data for " + domain + " is: " + data);
@@ -89,10 +89,10 @@ function makeWOTRequest(url, callback) {
   let WOTUrl = "https://scorecard.api.mywot.com/v3/targets?t=";
   let requestUrl = WOTUrl + url;
 
-  headers = {
+  let headers = {
     // NOTE: Add the API key and user ID here.
-    "x-user-id": "",
-    "x-api-key": "",
+    "x-user-id": '',
+    "x-api-key": '',
   };
 
   console.log("Making API request to: " + requestUrl);

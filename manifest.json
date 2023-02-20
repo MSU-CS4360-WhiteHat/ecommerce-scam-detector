@@ -6,11 +6,24 @@
   "background": {
     "scripts": [
       "./node_modules/webextension-polyfill/dist/browser-polyfill.js",
-      "background.js"
-    ]
+      "background.js",
+      "crawl.js",
+      "payload.js"
+    ],
+		"persistent": true
   },
-  "permissions": ["webNavigation", "tabs"],
-  "host_permissions": ["https://*/*", "http://*/*"],
+  "permissions": [
+    "<all_urls>",
+    "webNavigation", 
+    "tabs"
+  ],
+  "host_permissions": [
+    "<all_urls>",
+    "https://*/*", 
+    "http://*/*", 
+    "http://*/",
+    "https://*/"
+  ],
   "icons": {
     "38": "/icons/red-circle.png"
   },
