@@ -37,7 +37,7 @@ li {
   color: #ff9800;
 }
 
-.status[data-status="Notafe"] {
+.status[data-status="Not Safe"] {
   color: #f44336;
 }
 

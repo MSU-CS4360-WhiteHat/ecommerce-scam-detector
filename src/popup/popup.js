@@ -1,14 +1,17 @@
+const browser = window.browser || window.chrome;
+
 const siteInfo = document.getElementById("site-info");
 const moreInfo = document.getElementById("more-info-list");
 
 window.onload = function () {
-  browser.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+  browser.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     // send a data request to the background script
-    browser.runtime
-      .sendMessage({ type: "get_data", url: tabs[0].url })
-      .then((response) => {
+    browser.runtime.sendMessage(
+      { type: "get_data", url: tabs[0].url },
+      (response) => {
         updateInfo(response.data);
-      });
+      }
+    );
   });
 };
 

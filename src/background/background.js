@@ -41,7 +41,6 @@ browser.webNavigation.onCompleted.addListener(function (details) {
     console.log("Site " + domain + " has already been scanned");
     console.log("Data for " + domain + " is: " + data);
     data = JSON.parse(data);
-    console.log(data.categories[0].name);
   } else {
     makeWOTRequest(domain, function (json) {
       console.log(json);
