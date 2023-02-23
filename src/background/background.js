@@ -10,29 +10,16 @@ function domain_from_url(url) {
   return url.split("/")[2];
 }
 
-// Called when the user clicks on the extension's icon.
-browser.browserAction.onClicked.addListener(function (tab) {
-  toggleIcon();
-});
-
-// Called before the Navigation occurs.
-browser.webNavigation.onBeforeNavigate.addListener(function (details) {
-  if (riskStatus == Risk.HIGH) {
-    // Consider stopping page load and asking the user if they wish to continue
-    // if we deep scan here and find some oddities.
-    console.log("Risk is HIGH");
-  } else if (!riskStatus) {
-    // Consider a please wait while we check if the site is safe?
-    // Deep scan here.
-    //  If this causes a huge latency before page load, we can move it to onCompleted.
-    console.log("Site " + domain + " has not been scanned, scanning now.");
-    // TODO replace with an method call to the application service.
-    // e.g. const riskResults = someApiFunctionCall() ?? Risk.UNKNOWN
-    const riskResults = Risk.UNKNOWN;
-    localStorage.setItem(domain, riskResults);
-  } else {
-    // TODO Debugging else, remove.
-    console.log("Site " + domain + " has already been scanned--do nothing");
+// listen for a data request from the popup script
+browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+  if (request.type == "get_data") {
+    const domain = domain_from_url(request.url);
+    let data = localStorage.getItem(domain);
+    if (data) {
+      sendResponse({ data: data });
+    } else {
+      sendResponse({ data: "No data found" });
+    }
   }
 });
 
@@ -48,32 +35,20 @@ browser.webNavigation.onCompleted.addListener(function (details) {
   }
   console.log("Getting data from local storage for: " + domain);
 
-  const data = localStorage.getItem(domain);
+  let data = localStorage.getItem(domain);
 
   if (data) {
     console.log("Site " + domain + " has already been scanned");
     console.log("Data for " + domain + " is: " + data);
-    return 1;
+    data = JSON.parse(data);
   } else {
     makeWOTRequest(domain, function (json) {
+      console.log(json);
       localStorage.setItem(domain, json);
+      data = json;
     });
   }
 });
-
-// Temp Code for testing the toggleIcon function
-let color = "red";
-function toggleIcon() {
-  if (color === "red") {
-    color = "yellow";
-  } else if (color === "yellow") {
-    color = "green";
-  } else {
-    color = "red";
-  }
-
-  setIcon(color);
-}
 
 // Sets the extension's icon to the specified color.
 // Available colors: "red", "yellow", "green"
@@ -103,6 +78,6 @@ function makeWOTRequest(url, callback) {
   })
     .then((response) => response.json())
     .then((json) => {
-      callback(JSON.stringify(json));
+      callback(json.length > 0 ? JSON.stringify(json[0]) : null);
     });
 }

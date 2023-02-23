@@ -6,10 +6,16 @@
   "background": {
     "scripts": [
       "./node_modules/webextension-polyfill/dist/browser-polyfill.js",
-      "background.js"
+      "src/background/background.js"
     ]
   },
-  "permissions": ["webNavigation", "tabs"],
+  "permissions": [
+    "webNavigation",
+    "tabs",
+    "runtime",
+    "storage",
+    "browserAction"
+  ],
   "host_permissions": ["https://*/*", "http://*/*"],
   "icons": {
     "38": "/icons/red-circle.png"
@@ -22,6 +28,7 @@
   "browser_action": {
     "default_icon": {
       "38": "/icons/red-circle.png"
-    }
+    },
+    "default_popup": "src/popup/popup.html"
   }
 }
