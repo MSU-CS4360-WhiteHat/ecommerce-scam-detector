@@ -1,0 +1,58 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 1rem;
+  font-family: "Open Sans", sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #ececec;
+  background-color: #4d505a;
+  width: 15rem;
+  height: fit-content;
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+li {
+  background-color: #413e54;
+  margin: 0.5rem 0;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+}
+
+.status[data-status="Safe"] {
+  color: #4caf50;
+}
+
+.status[data-status="Suspicious"] {
+  color: #ff9800;
+}
+
+.status[data-status="Notafe"] {
+  color: #f44336;
+}
+
+details[open] summary ~ * {
+  animation: sweep 0.5s ease-in-out;
+}
+
+@keyframes sweep {
+  0% {
+    opacity: 0;
+    margin-left: -10px;
+  }
+
+  100% {
+    opacity: 1;
+    margin-left: 0px;
+  }
+}
