@@ -78,6 +78,6 @@ function makeWOTRequest(url, callback) {
   })
     .then((response) => response.json())
     .then((json) => {
-      callback(JSON.stringify(json[0]));
+      callback(json.length > 0 ? JSON.stringify(json[0]) : null);
     });
 }

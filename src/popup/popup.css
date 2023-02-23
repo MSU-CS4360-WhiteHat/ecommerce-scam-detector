@@ -33,7 +33,8 @@ li {
   color: #4caf50;
 }
 
-.status[data-status="Suspicious"] {
+.status[data-status="Suspicious"],
+.status[data-status="Unknown"] {
   color: #ff9800;
 }
 
