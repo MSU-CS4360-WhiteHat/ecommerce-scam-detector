@@ -6,8 +6,8 @@
   "content_scripts": [
     {
       "matches": ["https://*/*"],
-      "js": ["src/alert.js"],
-      "css": ["src/alert.css"]
+      "js": ["src/alert/alert.js"],
+      "css": ["src/alert/alert.css"]
     }
   ],
   "background": {

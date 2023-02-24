@@ -1,3 +1,5 @@
+"use strict";
+
 // Arbitrary numbers, we should adjust them as needed.
 const Risk = {
   HIGH: 3,
@@ -23,8 +25,31 @@ browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   }
 });
 
+function onError(error) {
+  console.error(`Error: ${error}`);
+}
+
+function sendMessageToTabs(tabs) {
+  for (const tab of tabs) {
+    browser.tabs
+      .sendMessage(tab.id, { greeting: "Hi from background script" })
+      .then((response) => {
+        console.log("Message from the content script:");
+        console.log(response.response);
+      })
+      .catch(onError);
+  }
+}
+
 // Called when the user navigates to a new page.
 browser.webNavigation.onCompleted.addListener(function (details) {
+  browser.tabs
+    .query({
+      currentWindow: true,
+      active: true,
+    })
+    .then(sendMessageToTabs)
+    .catch(onError);
   console.log("Navigated to: " + details.url);
   const domain = domain_from_url(details.url);
 
