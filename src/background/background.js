@@ -31,8 +31,15 @@ function onError(error) {
 
 function sendMessageToTabs(tabs) {
   for (const tab of tabs) {
+    const data = {
+      title: "This site seems unsafe!",
+      subTitle: "Our ranking",
+      rankNumber: 43,
+      message: "Here are the reasons this site could be harmful.",
+      reasons: ["Bad", "Awful", "No Good"],
+    };
     browser.tabs
-      .sendMessage(tab.id, { greeting: "Hi from background script" })
+      .sendMessage(tab.id, data)
       .then((response) => {
         console.log("Message from the content script:");
         console.log(response.response);

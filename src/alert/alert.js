@@ -1,27 +1,64 @@
 "use strict";
 
-const message =
-  "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Proin sed libero enim sed faucibus turpis in. Facilisis mauris sit amet massa vitae tortor. Aenean et tortor at risus viverra adipiscing at. Nec nam aliquam sem et tortor consequat id porta. Aliquet nibh praesent tristique magna sit amet purus gravida. Et ultrices neque ornare aenean euismod elementum nisi quis. Varius sit amet mattis vulputate enim nulla. Quam nulla porttitor massa id neque aliquam vestibulum morbi blandit. Ultrices tincidunt arcu non sodales neque sodales ut etiam. Nisl vel pretium lectus quam. Massa eget egestas purus viverra accumsan in. Dolor sit amet consectetur adipiscing. Elementum nibh tellus molestie nunc non blandit massa enim. Purus in mollis nunc sed id semper risus. Sit amet justo donec enim diam vulputate ut pharetra. Nisl vel pretium lectus quam id leo in vitae. Nibh nisl condimentum id venenatis a. Mauris cursus mattis molestie a iaculis at erat. Sed felis eget velit aliquet sagittis id consectetur purus. Commodo ullamcorper a lacus vestibulum. Massa massa ultricies mi quis hendrerit dolor magna eget est. Lectus mauris ultrices eros in. Lacus luctus accumsan tortor posuere. Velit dignissim sodales ut eu sem integer vitae justo. Mi bibendum neque egestas congue quisque egestas diam in. Volutpat sed cras ornare arcu dui. Elementum integer enim neque volutpat ac tincidunt. Arcu non sodales neque sodales ut etiam sit amet. Purus faucibus ornare suspendisse sed nisi lacus sed. Vitae elementum curabitur vitae nunc sed. Aliquam purus sit amet luctus venenatis.";
-function load_not_secure() {
+function load_not_secure(values) {
+  const title = values?.title;
+  const subTitle = values?.subTitle;
+  const rankNumber = values?.rankNumber;
+  const message = values?.message;
+  const reasons = values?.reasons;
+
   document.body.classList.add("stop-scrolling");
   window.scrollTo(0, 0);
 
   let backdrop = document.createElement("div");
-  backdrop.className += "container backdrop";
-  document.body.appendChild(backdrop);
-
   let container = document.createElement("div");
-  container.className += "container top-container";
-  document.body.appendChild(container);
+  let innerContent = document.createElement("div");
+  let hOneTitle = document.createElement("h1");
+  let hThreeSubTitle = document.createElement("h3");
+  let hTwoRank = document.createElement("h2");
+  let pMessage = document.createElement("p");
+  let orderedList = document.createElement("ol");
+  let buttons = document.createElement("div");
+  let stay = document.createElement("button");
+  let leave = document.createElement("button");
 
-  let header = document.createElement("h1");
-  header.textContent = message;
-  container.appendChild(header);
+  backdrop.className += "container backdrop";
+  container.className += "container top-container";
+  innerContent.className += "innercontent";
+  hThreeSubTitle.className += "shadoweffect";
+  buttons.className += "buttons";
+  stay.className += "btn btn-2s btn-2as";
+  leave.className += "btn btn-2 btn-2a";
+
+  hOneTitle.innerHTML = title;
+  hThreeSubTitle.innerHTML = subTitle;
+  hTwoRank.innerHTML = rankNumber;
+  pMessage.innerHTML = message;
+
+  reasons.forEach((element) => {
+    let listItem = document.createElement("li");
+    listItem.innerHTML = element;
+    orderedList.appendChild(listItem);
+  });
+
+  stay.innerHTML = "Stay";
+  leave.innerHTML = "Leave";
+
+  document.body.appendChild(backdrop);
+  document.body.appendChild(container);
+  container.appendChild(innerContent);
+  innerContent.appendChild(hOneTitle);
+  innerContent.appendChild(hThreeSubTitle);
+  innerContent.appendChild(hTwoRank);
+  innerContent.appendChild(pMessage);
+  innerContent.appendChild(orderedList);
+  innerContent.appendChild(buttons);
+  buttons.appendChild(stay);
+  buttons.appendChild(leave);
 }
 
 browser.runtime.onMessage.addListener((request, sender) => {
-  console.log("Message from the background script:");
-  console.log(request.greeting);
-  load_not_secure();
+  console.log(request);
+  load_not_secure(request);
   return Promise.resolve({ response: "Hi from content script" });
 });
