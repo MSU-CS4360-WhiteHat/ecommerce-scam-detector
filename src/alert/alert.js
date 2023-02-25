@@ -1,5 +1,7 @@
 "use strict";
 
+let app = window?.chrome ?? browser;
+
 function load_not_secure(values) {
   const title = values?.title;
   const subTitle = values?.subTitle;
@@ -61,7 +63,7 @@ function load_not_secure(values) {
   buttonContainer.appendChild(leave);
 }
 
-browser.runtime.onMessage.addListener((request, sender) => {
+app.runtime.onMessage.addListener((request, sender) => {
   console.log(request);
   load_not_secure(request);
   return Promise.resolve({ response: "Hi from content script" });

@@ -18,7 +18,7 @@ html > body > .container > .innercontent > h2,
 html > body > .container > .innercontent > h3,
 html > body > .container > .innercontent > p {
   text-align: center;
-  margin: 10px 0;
+  margin: 10px 0 !important;
 }
 
 html > body > .container > .innercontent > h2 {
@@ -44,14 +44,16 @@ html > body > .container > .innercontent > .p {
 /* Organized List */
 
 html > body > .container > .innercontent > ol {
-  margin: 20px;
+  margin: auto 20px;
+  padding: 0 20%;
+  list-style-type: decimal;
 }
 
 /* Containers */
 
 html > body > .container {
   font-family: Arial, Helvetica, sans-serif;
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   bottom: 0;
