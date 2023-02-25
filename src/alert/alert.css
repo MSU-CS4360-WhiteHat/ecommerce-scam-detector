@@ -1,9 +1,11 @@
-.innercontent > h1,
-h2 {
+/* Typography */
+
+html > body > .container > .innercontent > h1,
+html > body > .container > .innercontent > h2 {
   font-size: 1.8rem;
 }
 
-.innercontent > h1 {
+html > body > .container > .innercontent > h1 {
   color: whitesmoke;
   background: #cb4e4e;
   box-shadow: 0 6px #ab3c3c;
@@ -11,19 +13,20 @@ h2 {
   padding: 20px 0;
 }
 
-.innercontent > h1,
-h2,
-h3,
-p {
+html > body > .container > .innercontent > h1,
+html > body > .container > .innercontent > h2,
+html > body > .container > .innercontent > h3,
+html > body > .container > .innercontent > p {
   text-align: center;
+  margin: 10px 0;
 }
 
-.innercontent > h2 {
+html > body > .container > .innercontent > h2 {
   font-size: 4rem;
   padding: -100px;
 }
 
-.innercontent > h2 {
+html > body > .container > .innercontent > h2 {
   font-family: "Avant Garde", Avantgarde, "Century Gothic", CenturyGothic,
     "AppleGothic", sans-serif;
   font-size: 4rem;
@@ -34,11 +37,19 @@ p {
   text-rendering: optimizeLegibility;
 }
 
-.innercontent > ol {
+html > body > .container > .innercontent > .p {
+  display: flex;
+}
+
+/* Organized List */
+
+html > body > .container > .innercontent > ol {
   margin: 20px;
 }
 
-.container {
+/* Containers */
+
+html > body > .container {
   font-family: Arial, Helvetica, sans-serif;
   position: absolute;
   top: 0;
@@ -48,16 +59,7 @@ p {
   overflow: hidden;
 }
 
-.backdrop {
-  background-color: black;
-  z-index: 100000;
-  opacity: 0.75;
-  min-height: 100vh;
-  min-width: 100vw;
-  backdrop-filter: blur(100px);
-}
-
-.top-container {
+html > body > .top-container {
   z-index: 100001;
   background-color: whitesmoke;
   max-width: 75vw;
@@ -72,27 +74,44 @@ p {
   align-content: center;
 }
 
-.innercontent {
+html > body > .container > .innercontent {
   overflow: scroll;
+  width: 100%;
+  margin-bottom: 50px;
+}
+
+/* Backdrop and stop scrolling */
+
+.stop-scrolling {
+  height: 100vw !important;
+  max-height: 100vw !important;
+  min-height: 100vw !important;
+  overflow: hidden !important;
+}
+
+.backdrop {
+  background-color: black;
+  z-index: 100000;
+  opacity: 0.75;
+  min-height: 100vh;
+  min-width: 100vw;
+  backdrop-filter: blur(100px);
+}
+
+/* Buttons */
+
+html > body > .container > .innercontent > .buttons {
+  position: absolute;
+  bottom: 0;
   width: 100%;
 }
 
-.stop-scrolling {
-  height: 100vw;
-  overflow: hidden;
-}
-
-.p {
+html > body > .container > .innercontent > .buttons > .button-container {
   display: flex;
+  justify-content: space-evenly;
 }
 
-.buttons {
-  display: flex;
-  flex-wrap: wrap;
-  flex-direction: row;
-}
-
-.btn {
+html > body > .container > .innercontent > .buttons > .button-container > .btn {
   border: none;
   font-family: inherit;
   font-size: inherit;
@@ -112,7 +131,13 @@ p {
   transition: all 0.3s;
 }
 
-.btn-2 {
+html
+  > body
+  > .container
+  > .innercontent
+  > .buttons
+  > .button-container
+  > .btn-2 {
   background: #cb4e4e;
   color: #fff;
   box-shadow: 0 6px #ab3c3c;
@@ -121,7 +146,13 @@ p {
   transition: none;
 }
 
-.btn-2s {
+html
+  > body
+  > .container
+  > .innercontent
+  > .buttons
+  > .button-container
+  > .btn-2s {
   background: #4ecb4e;
   color: #fff;
   box-shadow: 0 6px #3fab45;
@@ -130,7 +161,13 @@ p {
   transition: none;
 }
 
-.btn:after {
+html
+  > body
+  > .container
+  > .innercontent
+  > .buttons
+  > .button-container
+  > .btn:after {
   content: "";
   position: absolute;
   z-index: -1;
@@ -139,27 +176,75 @@ p {
   transition: all 0.3s;
 }
 
-.btn-2a,
-.btn-2as {
+html
+  > body
+  > .container
+  > .innercontent
+  > .buttons
+  > .button-container
+  > .btn-2a,
+html
+  > body
+  > .container
+  > .innercontent
+  > .buttons
+  > .button-container
+  > .btn-2as {
   border-radius: 0 0 5px 5px;
 }
 
-.btn-2a:hover,
-.btn-2as:hover {
+html
+  > body
+  > .container
+  > .innercontent
+  > .buttons
+  > .button-container
+  > .btn-2a:hover,
+html
+  > body
+  > .container
+  > .innercontent
+  > .buttons
+  > .button-container
+  > .btn-2as:hover {
   top: 2px;
 }
 
-.btn-2a:hover {
+html
+  > body
+  > .container
+  > .innercontent
+  > .buttons
+  > .button-container
+  > .btn-2a:hover {
   box-shadow: 0 4px #ab3c3c;
 }
 
-.btn-2as:hover {
+html
+  > body
+  > .container
+  > .innercontent
+  > .buttons
+  > .button-container
+  > .btn-2as:hover {
   box-shadow: 0 4px #3fab45;
   top: 2px;
 }
 
-.btn-2a:active,
-.btn-2as:active {
+html
+  > body
+  > .container
+  > .innercontent
+  > .buttons
+  > .button-container
+  > .btn-2a:active,
+html
+  > body
+  > .container
+  > .innercontent
+  > .buttons
+  > .button-container
+  > .btn-2as:active {
   box-shadow: 0 0 #ab3c3c;
   top: 6px;
 }

@@ -5,7 +5,7 @@
   "description": "An extension that tries to detect if a website is a scam or not",
   "content_scripts": [
     {
-      "matches": ["https://*/*"],
+      "matches": ["https://*/*", "http://*/*"],
       "js": ["src/alert/alert.js"],
       "css": ["src/alert/alert.css"]
     }

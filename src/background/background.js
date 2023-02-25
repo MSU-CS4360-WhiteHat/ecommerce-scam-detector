@@ -30,6 +30,7 @@ function onError(error) {
 }
 
 function sendMessageToTabs(tabs) {
+  console.info(tabs);
   for (const tab of tabs) {
     const data = {
       title: "This site seems unsafe!",
@@ -57,6 +58,7 @@ browser.webNavigation.onCompleted.addListener(function (details) {
     })
     .then(sendMessageToTabs)
     .catch(onError);
+
   console.log("Navigated to: " + details.url);
   const domain = domain_from_url(details.url);
 

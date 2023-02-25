@@ -9,6 +9,7 @@ function load_not_secure(values) {
 
   document.body.classList.add("stop-scrolling");
   window.scrollTo(0, 0);
+  document.body.parentElement.classList.add("stop-scrolling");
 
   let backdrop = document.createElement("div");
   let container = document.createElement("div");
@@ -19,6 +20,7 @@ function load_not_secure(values) {
   let pMessage = document.createElement("p");
   let orderedList = document.createElement("ol");
   let buttons = document.createElement("div");
+  let buttonContainer = document.createElement("div");
   let stay = document.createElement("button");
   let leave = document.createElement("button");
 
@@ -27,6 +29,7 @@ function load_not_secure(values) {
   innerContent.className += "innercontent";
   hThreeSubTitle.className += "shadoweffect";
   buttons.className += "buttons";
+  buttonContainer.className += "button-container";
   stay.className += "btn btn-2s btn-2as";
   leave.className += "btn btn-2 btn-2a";
 
@@ -53,8 +56,9 @@ function load_not_secure(values) {
   innerContent.appendChild(pMessage);
   innerContent.appendChild(orderedList);
   innerContent.appendChild(buttons);
-  buttons.appendChild(stay);
-  buttons.appendChild(leave);
+  buttons.appendChild(buttonContainer);
+  buttonContainer.appendChild(stay);
+  buttonContainer.appendChild(leave);
 }
 
 browser.runtime.onMessage.addListener((request, sender) => {
