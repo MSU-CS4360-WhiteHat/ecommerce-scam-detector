@@ -1,0 +1,25 @@
+{
+  "name": "ecommerce-scam-detector",
+  "version": "1.0.0",
+  "description": "A ecommerce-scam-detector",
+  "main": "background.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "safari-build": "xcrun safari-web-extension-converter ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MSU-CS4360-WhiteHat/ecommerse-scam-detector.git"
+  },
+  "author": "Theo, Cory, Lucas",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/MSU-CS4360-WhiteHat/ecommerse-scam-detector/issues"
+  },
+  "homepage": "https://github.com/MSU-CS4360-WhiteHat/ecommerse-scam-detector#readme",
+  "devDependencies": {
+    "prettier": "2.8.4",
+    "web-ext": "^7.5.0",
+    "webextension-polyfill": "^0.10.0"
+  }
+}
