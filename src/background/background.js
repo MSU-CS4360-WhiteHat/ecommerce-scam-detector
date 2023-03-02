@@ -1,4 +1,4 @@
-"use strict";
+//TODO add back in "use strict";
 
 // Arbitrary numbers, we should adjust them as needed.
 const Risk = {
