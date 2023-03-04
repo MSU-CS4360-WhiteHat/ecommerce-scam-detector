@@ -112,6 +112,16 @@ browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     } else {
       sendResponse({ data: "No data found" });
     }
+  } else if (request.type == "close_current_tab") {
+    browser.tabs.query(
+      {
+        currentWindow: true,
+        active: true,
+      },
+      function (tabs) {
+        browser.tabs.remove(tabs[0]?.id);
+      }
+    );
   }
 });
 

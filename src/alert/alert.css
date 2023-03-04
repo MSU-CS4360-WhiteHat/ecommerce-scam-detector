@@ -53,7 +53,7 @@ html > body > .container > .innercontent > ol {
 
 html > body > .container {
   font-family: Arial, Helvetica, sans-serif;
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
   bottom: 0;
@@ -79,7 +79,7 @@ html > body > .top-container {
 html > body > .container > .innercontent {
   overflow: scroll;
   width: 100%;
-  margin-bottom: 50px;
+  margin-bottom: 65px;
 }
 
 /* Backdrop and stop scrolling */
@@ -108,12 +108,28 @@ html > body > .container > .innercontent > .buttons {
   width: 100%;
 }
 
-html > body > .container > .innercontent > .buttons > .button-container {
+html
+  > body
+  > .container
+  > .innercontent
+  > .buttons
+  > .buttons-container-control {
   display: flex;
+  flex-direction: row;
   justify-content: space-evenly;
+  align-self: center;
+  align-items: center;
+  transform: scale(1);
+  float: center;
 }
 
-html > body > .container > .innercontent > .buttons > .button-container > .btn {
+html
+  > body
+  > .container
+  > .innercontent
+  > .buttons
+  > .buttons-container-control
+  > .btn {
   border: none;
   font-family: inherit;
   font-size: inherit;
@@ -131,6 +147,7 @@ html > body > .container > .innercontent > .buttons > .button-container > .btn {
   -webkit-transition: all 0.3s;
   -moz-transition: all 0.3s;
   transition: all 0.3s;
+  width: 100%;
 }
 
 html
@@ -138,7 +155,7 @@ html
   > .container
   > .innercontent
   > .buttons
-  > .button-container
+  > .buttons-container-control
   > .btn-2 {
   background: #cb4e4e;
   color: #fff;
@@ -153,11 +170,11 @@ html
   > .container
   > .innercontent
   > .buttons
-  > .button-container
+  > .buttons-container-control
   > .btn-2s {
-  background: #4ecb4e;
+  background: #0c6ccf;
   color: #fff;
-  box-shadow: 0 6px #3fab45;
+  box-shadow: 0 6px #334d7f;
   -webkit-transition: none;
   -moz-transition: none;
   transition: none;
@@ -168,7 +185,7 @@ html
   > .container
   > .innercontent
   > .buttons
-  > .button-container
+  > .buttons-container-control
   > .btn:after {
   content: "";
   position: absolute;
@@ -183,14 +200,14 @@ html
   > .container
   > .innercontent
   > .buttons
-  > .button-container
+  > .buttons-container-control
   > .btn-2a,
 html
   > body
   > .container
   > .innercontent
   > .buttons
-  > .button-container
+  > .buttons-container-control
   > .btn-2as {
   border-radius: 0 0 5px 5px;
 }
@@ -200,14 +217,14 @@ html
   > .container
   > .innercontent
   > .buttons
-  > .button-container
+  > .buttons-container-control
   > .btn-2a:hover,
 html
   > body
   > .container
   > .innercontent
   > .buttons
-  > .button-container
+  > .buttons-container-control
   > .btn-2as:hover {
   top: 2px;
 }
@@ -217,7 +234,7 @@ html
   > .container
   > .innercontent
   > .buttons
-  > .button-container
+  > .buttons-container-control
   > .btn-2a:hover {
   box-shadow: 0 4px #ab3c3c;
 }
@@ -227,9 +244,9 @@ html
   > .container
   > .innercontent
   > .buttons
-  > .button-container
+  > .buttons-container-control
   > .btn-2as:hover {
-  box-shadow: 0 4px #3fab45;
+  box-shadow: 0 4px #4669ad;
   top: 2px;
 }
 
@@ -238,14 +255,14 @@ html
   > .container
   > .innercontent
   > .buttons
-  > .button-container
+  > .buttons-container-control
   > .btn-2a:active,
 html
   > body
   > .container
   > .innercontent
   > .buttons
-  > .button-container
+  > .buttons-container-control
   > .btn-2as:active {
   box-shadow: 0 0 #ab3c3c;
   top: 6px;
