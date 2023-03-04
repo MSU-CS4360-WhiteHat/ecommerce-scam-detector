@@ -1,3 +1,5 @@
+//TODO add back in "use strict";
+
 // Arbitrary numbers, we should adjust them as needed.
 const Risk = {
   HIGH: 3,
@@ -6,8 +8,59 @@ const Risk = {
   UNKNOWN: 0,
 };
 
+// TODO see if we can make this a state, similar to react states @see https://www.w3schools.com/react/react_state.asp
+let payloadForUserPrompt = {
+  title: "This site seems unsafe!",
+  subTitle: "Our ranking",
+  rankNumber: 0,
+  message: "Here are the reasons this site could be harmful.",
+  reasons: [],
+};
+
 function domain_from_url(url) {
   return url.split("/")[2];
+}
+
+function onError(error) {
+  console.error(`Error: ${error}`);
+}
+
+/*
+---- When we determine the score and reasons it is unsafe use the following
+  
+payloadForUserPrompt = {
+    title: "This site seems unsafe!",
+    subTitle: "Our ranking",
+    rankNumber: 43,
+    message: "Here are the reasons this site could be harmful.",
+    reasons: ["Bad", "Awful", "No Good"],
+  };
+
+  or 
+
+  payloadForUserPrompt.rankNumber = 43;
+  payloadForUserPrompt.reasons = [...];
+
+---- When we want to trigger the prompt after we determine an score, use the following
+  
+browser.tabs
+  .query({
+    currentWindow: true,
+  })
+  .then(sendMessageToTabs)
+  .catch(onError);
+
+*/
+function sendMessageToTabs(tabs) {
+  for (const tab of tabs) {
+    browser.tabs
+      .sendMessage(tab.id, payloadForUserPrompt)
+      .then((response) => {
+        console.log("Message from the content script:");
+        console.log(response.response);
+      })
+      .catch(onError);
+  }
 }
 
 // listen for a data request from the popup script
