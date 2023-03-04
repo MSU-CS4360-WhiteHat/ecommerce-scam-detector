@@ -25,16 +25,17 @@
   ],
   "host_permissions": ["https://*/*", "http://*/*"],
   "icons": {
-    "38": "/icons/red-circle.png"
+    "38": "/icons/default.png"
   },
   "web_accessible_resources": [
-    "/icons/green-circle.png",
-    "/icons/yellow-circle.png",
-    "/icons/red-circle.png"
+    "/icons/safe.png",
+    "/icons/warning.png",
+    "/icons/unsafe.png",
+    "/icons/default.png"
   ],
   "browser_action": {
     "default_icon": {
-      "38": "/icons/red-circle.png"
+      "38": "/icons/default.png"
     },
     "default_popup": "src/popup/popup.html"
   }
