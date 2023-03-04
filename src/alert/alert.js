@@ -1,6 +1,7 @@
-"use strict";
-
 const app = window?.chrome ?? browser;
+
+let loadAgain = true;
+let loaded = false;
 
 function loadNotSecure(values) {
   const title = values?.title;
@@ -102,7 +103,7 @@ const closeTab = (e) => {
   browser.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     // send a data request to the background script
     browser.runtime.sendMessage(
-      { type: "close_current_tab", url: tabs[0]?.url },
+      { type: "close_current_tab", url: tabs[0].url },
       (response) => {
         updateInfo(response.data);
       }
@@ -111,13 +112,17 @@ const closeTab = (e) => {
 };
 
 app.runtime.onMessage.addListener((request, sender) => {
+  console.log("Message Received from Background to alert");
   console.log(request);
-  loadNotSecure(request);
+  if (loadAgain && !loaded) {
+    loadNotSecure(request);
+  }
   waitForElm("#stay").then((elm) => {
     console.log("Element is ready");
     console.log(elm.textContent);
     let stay = document.getElementById("stay");
     stay.addEventListener("click", closePopup, false);
+    loadAgain = false;
   });
   waitForElm("#leave").then((elm) => {
     console.log("Element is ready");

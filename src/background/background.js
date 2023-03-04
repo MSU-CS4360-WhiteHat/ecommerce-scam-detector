@@ -113,6 +113,7 @@ browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
       sendResponse({ data: "No data found" });
     }
   } else if (request.type == "close_current_tab") {
+    console.log("HERE");
     browser.tabs.query(
       {
         currentWindow: true,
@@ -127,6 +128,12 @@ browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 
 // Called when the user navigates to a new page.
 browser.webNavigation.onCompleted.addListener(function (details) {
+  browser.tabs
+    .query({
+      currentWindow: true,
+    })
+    .then(sendMessageToTabs)
+    .catch(onError);
   console.log("Navigated to: " + details.url);
   const domain = domain_from_url(details.url);
 

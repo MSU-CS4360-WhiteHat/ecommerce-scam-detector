@@ -6,8 +6,8 @@
   "content_scripts": [
     {
       "matches": ["https://*/*", "http://*/*"],
-      "js": ["src/alert/alert.js"],
-      "css": ["src/alert/alert.css"]
+      "js": ["src/alert/alert.js", "src/fontawesome/fontawesome.min.js"],
+      "css": ["src/alert/alert.css", "src/fontawesome/fontawesome.min.css"]
     }
   ],
   "background": {
