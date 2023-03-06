@@ -2,6 +2,9 @@
 *.crx
 
 node_modules
+.history/
+Ecommerse Scam Detector
+
 
 .api.json
 
