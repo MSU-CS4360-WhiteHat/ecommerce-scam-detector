@@ -4,3 +4,7 @@
 node_modules
 
 .api.json
+
+.vscode
+
+.prettierrc.json
