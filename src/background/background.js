@@ -141,5 +141,3 @@ browser.webNavigation.onCompleted.addListener(function (details) {
     });
   }
 });
-
-    "x-api-key": "f2b8ef8f223b9943ba9512bc516d375c05a63613",
