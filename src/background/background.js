@@ -71,10 +71,10 @@ function sendMessageToTabs(tabs) {
 }
 
 // Sets the extension's icon to the specified color.
-function setIcon(status) {
+function setIcon(status = "default") {
   console.debug("setting status to: ", status);
   try {
-    browser.browserAction.setIcon({ path: "/icons/" + status + ".png" });
+    browser.browserAction.setIcon({ path: "/icons/" + status + ".svg" });
   } catch (e) {
     console.log(e);
   }

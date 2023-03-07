@@ -17,7 +17,7 @@
       "crawl.js",
       "payload.js"
     ],
-		"persistent": true
+    "persistent": true
   },
   "permissions": [
     "<all_urls>",
@@ -29,23 +29,23 @@
   ],
   "host_permissions": [
     "<all_urls>",
-    "https://*/*", 
-    "http://*/*", 
+    "https://*/*",
+    "http://*/*",
     "http://*/",
     "https://*/"
   ],
   "icons": {
-    "38": "/icons/default.png"
+    "38": "/icons/safe.svg"
   },
   "web_accessible_resources": [
-    "/icons/safe.png",
-    "/icons/warning.png",
-    "/icons/unsafe.png",
-    "/icons/default.png"
+    "/icons/safe.svg",
+    "/icons/warning.svg",
+    "/icons/unsafe.svg",
+    "/icons/default.svg"
   ],
   "browser_action": {
     "default_icon": {
-      "38": "/icons/default.png"
+      "38": "/icons/default.svg"
     },
     "default_popup": "src/popup/popup.html"
   }
