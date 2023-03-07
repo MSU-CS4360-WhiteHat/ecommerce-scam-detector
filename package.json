@@ -21,5 +21,8 @@
     "prettier": "2.8.4",
     "web-ext": "^7.5.0",
     "webextension-polyfill": "^0.10.0"
+  },
+  "dependencies": {
+    "request": "^2.88.2"
   }
 }

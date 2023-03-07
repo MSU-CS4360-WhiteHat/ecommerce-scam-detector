@@ -13,17 +13,27 @@
   "background": {
     "scripts": [
       "./node_modules/webextension-polyfill/dist/browser-polyfill.js",
-      "src/background/background.js"
-    ]
+      "src/background/background.js",
+      "crawl.js",
+      "payload.js"
+    ],
+		"persistent": true
   },
   "permissions": [
+    "<all_urls>",
     "webNavigation",
     "tabs",
     "runtime",
     "storage",
     "browserAction"
   ],
-  "host_permissions": ["https://*/*", "http://*/*"],
+  "host_permissions": [
+    "<all_urls>",
+    "https://*/*", 
+    "http://*/*", 
+    "http://*/",
+    "https://*/"
+  ],
   "icons": {
     "38": "/icons/red-circle.png"
   },
