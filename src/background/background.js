@@ -117,7 +117,7 @@ function makeWOTRequest(url, callback) {
   let WOTUrl = "https://scorecard.api.mywot.com/v3/targets?t=";
   let requestUrl = WOTUrl + url;
 
-  headers = {
+  let headers = {
     // NOTE: Add the API key and user ID here.
     "x-user-id": "",
     "x-api-key": "",

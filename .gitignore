@@ -4,3 +4,10 @@
 node_modules
 .history/
 Ecommerse Scam Detector
+
+
+.api.json
+
+.vscode
+
+.prettierrc.json
