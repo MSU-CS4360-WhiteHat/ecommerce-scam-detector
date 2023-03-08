@@ -168,3 +168,48 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
     );
   }
 });
+
+// whois
+function whois(domain, callback) {
+  const whoisServer = "whois.verisign-grs.com";
+  const whoisPort = 43;
+  let response = "";
+
+  // Create a new socket and connect to the WHOIS server
+  chrome.sockets.tcp.create({}, (createInfo) => {
+    chrome.sockets.tcp.connect(
+      createInfo.socketId,
+      whoisServer,
+      whoisPort,
+      () => {
+        const query = domain + "\r\n";
+        const buffer = new ArrayBuffer(query.length);
+        const data = new Uint8Array(buffer);
+        for (let i = 0; i < query.length; i++) {
+          data[i] = query.charCodeAt(i);
+        }
+        chrome.sockets.tcp.send(createInfo.socketId, buffer, () => {
+          // Handle incoming data from the server
+          chrome.sockets.tcp.onReceive.addListener((info) => {
+            if (info.socketId === createInfo.socketId && info.data) {
+              response += String.fromCharCode.apply(
+                null,
+                new Uint8Array(info.data)
+              );
+            }
+          });
+          // Handle the end of the response
+          chrome.sockets.tcp.onReceive.addListener((info) => {
+            if (
+              info.socketId === createInfo.socketId &&
+              info.data.byteLength === 0
+            ) {
+              callback(response);
+              chrome.sockets.tcp.close(createInfo.socketId);
+            }
+          });
+        });
+      }
+    );
+  });
+}
