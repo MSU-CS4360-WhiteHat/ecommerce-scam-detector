@@ -24,4 +24,10 @@ chrome.runtime.onMessage.addListener(function (message) {
     console.log("Website: " + title);
     console.log(htmlDocument);
   }
+
+  if (htmlDocument.documentElement.innerHTML.includes("cart")) {
+    console.log("Found the word 'cart' in the HTML document");
+  } else {
+    console.log("No cart found");
+  }
 });

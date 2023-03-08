@@ -1,5 +1,7 @@
 //TODO add back in "use strict";
 
+const debug = true;
+
 // Arbitrary numbers, we should adjust them as needed.
 const Risk = {
   HIGH: 3,
@@ -95,11 +97,36 @@ browser.webNavigation.onCompleted.addListener(function (details) {
     console.log("Data for " + domain + " is: " + data);
     data = JSON.parse(data);
   } else {
-    makeWOTRequest(domain, function (json) {
-      console.log(json);
-      localStorage.setItem(domain, json);
-      data = json;
-    });
+    if (!debug) {
+      makeWOTRequest(domain, function (json) {
+        console.log(json);
+        localStorage.setItem(domain, json);
+        data = json;
+      });
+    }
+  }
+});
+
+// Checks for SSL Certificate on website
+// TODO: do not check on brand new tab
+// TODO: save to local storage?
+chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+  if (changeInfo.status === "complete") {
+    const url = tab.url;
+    const certificate = await window.crypto.subtle.digest(
+      "SHA-256",
+      new TextEncoder().encode(
+        await fetch(url).then((response) => response.arrayBuffer())
+      )
+    );
+
+    console.log(
+      `The SSL certificate of ${url} is: ${Array.from(
+        new Uint8Array(certificate)
+      )
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("")}`
+    );
   }
 });
 

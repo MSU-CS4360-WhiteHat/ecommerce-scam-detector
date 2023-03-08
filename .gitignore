@@ -11,3 +11,5 @@ Ecommerse Scam Detector
 .vscode
 
 .prettierrc.json
+
+.env
