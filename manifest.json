@@ -35,7 +35,7 @@
     "https://*/"
   ],
   "icons": {
-    "38": "/icons/safe.svg"
+    "38": "/icons/default.svg"
   },
   "web_accessible_resources": [
     "/icons/safe.svg",
