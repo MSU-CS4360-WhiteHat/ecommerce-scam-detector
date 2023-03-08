@@ -8,6 +8,13 @@ const Risk = {
   UNKNOWN: 0,
 };
 
+const Icons = {
+  SAFE: "safe",
+  WARN: "warning",
+  UNSAFE: "unsafe",
+  DEFAULT: "default",
+};
+
 // TODO see if we can make this a state, similar to react states @see https://www.w3schools.com/react/react_state.asp
 let payloadForUserPrompt = {
   title: "This site seems unsafe!",
@@ -63,6 +70,38 @@ function sendMessageToTabs(tabs) {
   }
 }
 
+// Sets the extension's icon to the specified color.
+function setIcon(status = "default") {
+  console.debug("setting status to: ", status);
+  try {
+    browser.browserAction.setIcon({ path: "/icons/" + status + ".svg" });
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+function makeWOTRequest(url, callback) {
+  let WOTUrl = "https://scorecard.api.mywot.com/v3/targets?t=";
+  let requestUrl = WOTUrl + url;
+
+  headers = {
+    // NOTE: Add the API key and user ID here.
+    "x-user-id": "",
+    "x-api-key": "",
+  };
+
+  console.log("Making API request to: " + requestUrl);
+
+  fetch(requestUrl, {
+    method: "GET",
+    headers: headers,
+  })
+    .then((response) => response.json())
+    .then((json) => {
+      callback(json.length > 0 ? JSON.stringify(json[0]) : null);
+    });
+}
+
 // listen for a data request from the popup script
 browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   if (request.type == "get_data") {
@@ -102,35 +141,3 @@ browser.webNavigation.onCompleted.addListener(function (details) {
     });
   }
 });
-
-// Sets the extension's icon to the specified color.
-// Available colors: "red", "yellow", "green"
-function setIcon(color) {
-  try {
-    browser.browserAction.setIcon({ path: "/icons/" + color + "-circle.png" });
-  } catch (e) {
-    console.log(e);
-  }
-}
-
-function makeWOTRequest(url, callback) {
-  let WOTUrl = "https://scorecard.api.mywot.com/v3/targets?t=";
-  let requestUrl = WOTUrl + url;
-
-  let headers = {
-    // NOTE: Add the API key and user ID here.
-    "x-user-id": "",
-    "x-api-key": "",
-  };
-
-  console.log("Making API request to: " + requestUrl);
-
-  fetch(requestUrl, {
-    method: "GET",
-    headers: headers,
-  })
-    .then((response) => response.json())
-    .then((json) => {
-      callback(json.length > 0 ? JSON.stringify(json[0]) : null);
-    });
-}
