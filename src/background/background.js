@@ -104,6 +104,7 @@ function makeWOTRequest(url, callback) {
 
 // listen for a data request from the popup script
 browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+  console.warn(request?.type);
   if (request.type == "get_data") {
     const domain = domain_from_url(request.url);
     let data = localStorage.getItem(domain);
@@ -112,7 +113,9 @@ browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     } else {
       sendResponse({ data: "No data found" });
     }
-  } else if (request.type == "close_current_tab") {
+  }
+
+  if (request.type == "close_current_tab") {
     console.log("HERE");
     browser.tabs.query(
       {
