@@ -1,28 +1,17 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <title>Alert</title>
-    <link rel="stylesheet" href="alert.css" />
-  </head>
-
+<html lang="en" id="scam-detector-alert">
+  <link rel="stylesheet" href="alert.css" />
   <body>
-    <div class="container backdrop"></div>
-    <div class="container top-container">
-      <div class="innercontent">
-        <h1>This site seems unsafe!</h1>
-        <h3>Our ranking</h3>
-        <h2 class="shadoweffect">43</h2>
-        <p>Here are the reasons this site could be harmful.</p>
-        <ol>
-          <li>bad</li>
-          <li>awful</li>
-          <li>no good</li>
-        </ol>
-      </div>
-      <div class="buttons">
-        <button class="btn btn-2s btn-2as">Stay</button>
-        <button class="btn btn-2 btn-2a">Leave</button>
-      </div>
+    <h1 id="title">T</h1>
+    <div id="content">
+      <h3 id="sub-title"></h3>
+      <h2 id="ranking"></h2>
+      <p id="message"></p>
+      <ol id="reasons"></ol>
+    </div>
+    <div id="buttons">
+      <button id="stay" class="btn btn-2s btn-2as">Stay</button>
+      <button id="leave" class="btn btn-2 btn-2a">Leave</button>
     </div>
     <script src="alert.js"></script>
   </body>
