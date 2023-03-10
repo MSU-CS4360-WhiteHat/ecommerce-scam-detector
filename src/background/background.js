@@ -34,6 +34,21 @@ browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     }
   }
 
+  if (request.type == "alert_opened") {
+    // send anoter open alert message so the alert.js script can get the data
+    browser.tabs
+      .query({
+        currentWindow: true,
+        active: true,
+      })
+      .then((tabs) => {
+        browser.tabs.sendMessage(tabs[0].id, {
+          type: "open_alert",
+          payload: testPayload,
+        });
+      });
+  }
+
   if (request.type == "close_alert") {
     // send a message to the content script to close the alert
     browser.tabs
@@ -59,6 +74,7 @@ browser.webNavigation.onCompleted.addListener(function (details) {
       active: true,
     })
     .then((tabs) => {
+      console.log("Sending message to open alert");
       browser.tabs.sendMessage(tabs[0].id, {
         type: "open_alert",
         payload: testPayload,

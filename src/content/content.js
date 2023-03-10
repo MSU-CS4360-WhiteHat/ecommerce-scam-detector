@@ -31,6 +31,9 @@ function openAlert() {
 app.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.type === "open_alert") {
     openAlert(request.tabId);
+    app.runtime.sendMessage({
+      type: "alert_opened",
+    });
   } else if (request.type === "close_alert") {
     // close the alert
     iframe.remove();
