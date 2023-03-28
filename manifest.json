@@ -6,8 +6,10 @@
   "background": {
     "scripts": [
       "./node_modules/webextension-polyfill/dist/browser-polyfill.js",
-      "src/background/background.js"
-    ]
+      "src/background/background.js",
+      "src/background/evaluate.js"
+    ],
+    "persistent": true
   },
   "permissions": [
     "webNavigation",

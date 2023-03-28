@@ -1,10 +1,4 @@
-// Arbitrary numbers, we should adjust them as needed.
-const Risk = {
-  HIGH: 3,
-  MED: 2,
-  LOW: 1,
-  UNKNOWN: 0,
-};
+let data = null;
 
 function domain_from_url(url) {
   return url.split("/")[2];
@@ -35,18 +29,31 @@ browser.webNavigation.onCompleted.addListener(function (details) {
   }
   console.log("Getting data from local storage for: " + domain);
 
-  let data = localStorage.getItem(domain);
+  let localStorageData = localStorage.getItem(domain);
 
-  if (data) {
+  if (localStorageData) {
     console.log("Site " + domain + " has already been scanned");
     console.log("Data for " + domain + " is: " + data);
     data = JSON.parse(data);
   } else {
     makeWOTRequest(domain, function (json) {
-      console.log(json);
       localStorage.setItem(domain, json);
       data = json;
-    });
+      // Iterate through each category and compile weight
+      let weight = 100;
+      data[0]?.categories.forEach((category) => {
+        weight = new Evaluate()
+          .setWeight(weight)
+          .setCategoryId(category.id)
+          .setConfidence(category.confidence)
+          .setValues([0, 2, 4, 8]) // if not set, defaults to [0,1,2,3]
+          .setIsSecure(true) // Set using the scraper tool
+          .setHasSslCert(true) // Set using the scraper tool
+          .evaluateWeight()
+          .getWeight();
+      });
+      console.warn(weight);
+    }).catch((error) => console.error(error));
   }
 });
 
@@ -60,24 +67,30 @@ function setIcon(color) {
   }
 }
 
-function makeWOTRequest(url, callback) {
-  let WOTUrl = "https://scorecard.api.mywot.com/v3/targets?t=";
-  let requestUrl = WOTUrl + url;
+async function makeWOTRequest(url, callback) {
+  const WOTUrl = "https://scorecard.api.mywot.com/v3/targets?t=";
+  const requestUrl = WOTUrl + url;
 
   headers = {
     // NOTE: Add the API key and user ID here.
-    "x-user-id": "",
-    "x-api-key": "",
+    "x-user-id": "8866427",
+    "x-api-key": "f2b8ef8f223b9943ba9512bc516d375c05a63613",
+    // "x-user-id": process.env.X_USER_ID,
+    // "x-api-key": process.env.X_API_KEY,
   };
 
   console.log("Making API request to: " + requestUrl);
 
-  fetch(requestUrl, {
+  /**
+   * In summary, use await fetch() when you need to perform some operation with the data obtained
+   * from the HTTP response before proceeding with the next line of code, and use fetch() with
+   * then() when you want to perform multiple asynchronous operations in a specific order.
+   */
+  const response = await fetch(requestUrl, {
     method: "GET",
     headers: headers,
-  })
-    .then((response) => response.json())
-    .then((json) => {
-      callback(json.length > 0 ? JSON.stringify(json[0]) : null);
-    });
+  });
+  const json = await response.json();
+
+  callback(json);
 }
