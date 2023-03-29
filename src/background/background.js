@@ -1,6 +1,5 @@
-//TODO add back in "use strict";
-
 const debug = true;
+const STATIC_RATING = 5;
 
 let isSecure = false;
 let hasSSLCert = false;
@@ -139,29 +138,29 @@ browser.webNavigation.onCompleted.addListener(function (details) {
     console.log("Data for " + domain + " is: " + localStorageData);
     localStorageData = JSON.parse(localStorageData);
   } else {
-      makeWOTRequest(domain, function (json) {
-        localStorage.setItem(domain, json);
-        localStorageData = json;
-        // Iterate through each category and compile weight
-        localStorageData[0]?.categories.forEach((category) => {
-          weight = new Evaluate()
-            .setWeight(weight)
-            .setCategoryId(category.id)
-            .setConfidence(category.confidence)
-            .setValues([0, 2, 4, 8]) // if not set, defaults to [0,1,2,3]
-            .evaluateWeight()
-            .getWeight();
-        });
+    makeWOTRequest(domain, function (json) {
+      localStorageData = json;
+      // Iterate through each category and compile weight
+      localStorageData[0]?.categories.forEach((category) => {
+        weight = new Evaluate()
+          .setWeight(weight)
+          .setCategoryId(category.id)
+          .setConfidence(category.confidence)
+          .setValues([0, 2, 4, 8]) // if not set, defaults to [0,1,2,3]
+          .evaluateWeight()
+          .getWeight();
+      });
 
-        if (!isSecure && !hasSSLCert) {
-          weight -= (STATIC_RATING ?? 5) * 2;
-        } else if (!isSecure || !hasSSLCert) {
-          weight -= STATIC_RATING ?? 5;
-        }
+      if (!isSecure && !hasSSLCert) {
+        weight -= (STATIC_RATING ?? 5) * 2;
+      } else if (!isSecure || !hasSSLCert) {
+        weight -= STATIC_RATING ?? 5;
+      }
 
-        console.warn(weight);
-        // TODO send weight to the popup.
-      }).catch((error) => console.error(error));
+      localStorage.setItem(domain, JSON.stringify(json));
+      console.warn(weight);
+      // TODO send weight to the popup.
+    }).catch((error) => console.error(error));
   }
 });
 
