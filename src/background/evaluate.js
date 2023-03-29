@@ -7,9 +7,6 @@ const MILD_IMPACT = 1;
 const MODERATE_IMPACT = 2;
 const SEVERE_IMPACT = 3;
 
-// Web scraping
-const STATIC_RATING = 5;
-
 const WOT_RATING = {
   100: SEVERE_IMPACT,
   200: MODERATE_IMPACT,
@@ -76,8 +73,6 @@ class Evaluate {
     this.otherValues = [];
     this.rating = getWotRating;
     this.multiplier = getGradeMultiplier;
-    this.isSecure = false;
-    this.hasSslCert = false;
   }
 
   setWeight(weight) {
@@ -119,16 +114,6 @@ class Evaluate {
     return this;
   }
 
-  setIsSecure(value) {
-    this.isSecure = value;
-    return this;
-  }
-
-  setHasSslCert(value) {
-    this.hasSslCert = value;
-    return this;
-  }
-
   getWeight() {
     return this.weight;
   }
@@ -146,16 +131,9 @@ class Evaluate {
     const deduction = this.rating(this.categoryId, this.values);
     const change = deduction * multiplier;
 
-    if (!this.isSecure && this.weight > 0) {
-      this.weight -= STATIC_RATING;
-    }
-    if (!this.hasSslCert && this.weight > 0) {
-      this.weight -= STATIC_RATING;
-    }
-
     this.weight -= change;
 
-    this.weight > 0 ? this.weight : 0;
+    this.weight = this.weight > 0 ? this.weight : 0;
 
     return this;
   }
