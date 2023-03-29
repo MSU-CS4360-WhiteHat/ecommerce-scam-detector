@@ -2,13 +2,10 @@
 
 const debug = true;
 
-// Arbitrary numbers, we should adjust them as needed.
-const Risk = {
-  HIGH: 3,
-  MED: 2,
-  LOW: 1,
-  UNKNOWN: 0,
-};
+let isSecure = false;
+let hasSSLCert = false;
+
+let weight = 100; // we can rename to score.
 
 const Icons = {
   SAFE: "safe",
@@ -82,9 +79,9 @@ function setIcon(status = "default") {
   }
 }
 
-function makeWOTRequest(url, callback) {
-  let WOTUrl = "https://scorecard.api.mywot.com/v3/targets?t=";
-  let requestUrl = WOTUrl + url;
+async function makeWOTRequest(url, callback) {
+  const WOTUrl = "https://scorecard.api.mywot.com/v3/targets?t=";
+  const requestUrl = WOTUrl + url;
 
   headers = {
     // NOTE: Add the API key and user ID here.
@@ -94,23 +91,29 @@ function makeWOTRequest(url, callback) {
 
   console.log("Making API request to: " + requestUrl);
 
-  fetch(requestUrl, {
+  /**
+   * In summary, use await fetch() when you need to perform some operation with the data obtained
+   * from the HTTP response before proceeding with the next line of code, and use fetch() with
+   * then() when you want to perform multiple asynchronous operations in a specific order.
+   */
+  // NOTE:  If we want to switch back to using then, we can.
+  //        This tells it to wait and prevents null errors.
+  const response = await fetch(requestUrl, {
     method: "GET",
     headers: headers,
-  })
-    .then((response) => response.json())
-    .then((json) => {
-      callback(json.length > 0 ? JSON.stringify(json[0]) : null);
-    });
+  });
+  const json = await response.json();
+
+  callback(json);
 }
 
 // listen for a data request from the popup script
 browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   if (request.type == "get_data") {
     const domain = domain_from_url(request.url);
-    let data = localStorage.getItem(domain);
-    if (data) {
-      sendResponse({ data: data });
+    let localStorageData = localStorage.getItem(domain);
+    if (localStorageData) {
+      sendResponse({ data: localStorageData });
     } else {
       sendResponse({ data: "No data found" });
     }
@@ -129,19 +132,37 @@ browser.webNavigation.onCompleted.addListener(function (details) {
   }
   console.log("Getting data from local storage for: " + domain);
 
-  let data = localStorage.getItem(domain);
+  let localStorageData = localStorage.getItem(domain);
 
-  if (data) {
+  if (localStorageData) {
     console.log("Site " + domain + " has already been scanned");
-    console.log("Data for " + domain + " is: " + data);
-    data = JSON.parse(data);
+    console.log("Data for " + domain + " is: " + localStorageData);
+    localStorageData = JSON.parse(localStorageData);
   } else {
     if (!debug) {
       makeWOTRequest(domain, function (json) {
-        console.log(json);
         localStorage.setItem(domain, json);
-        data = json;
-      });
+        localStorageData = json;
+        // Iterate through each category and compile weight
+        localStorageData[0]?.categories.forEach((category) => {
+          weight = new Evaluate()
+            .setWeight(weight)
+            .setCategoryId(category.id)
+            .setConfidence(category.confidence)
+            .setValues([0, 2, 4, 8]) // if not set, defaults to [0,1,2,3]
+            .evaluateWeight()
+            .getWeight();
+        });
+
+        if (!isSecure && !hasSSLCert) {
+          weight -= (STATIC_RATING ?? 5) * 2;
+        } else if (!isSecure || !hasSSLCert) {
+          weight -= STATIC_RATING ?? 5;
+        }
+
+        console.warn(weight);
+        // TODO send weight to the popup.
+      }).catch((error) => console.error(error));
     }
   }
 });
@@ -166,6 +187,8 @@ browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
         .map((b) => b.toString(16).padStart(2, "0"))
         .join("")}`
     );
+
+    // TODO adjust the hasSSLCert flag here.
   }
 
   // Only run the code if the URL has changed and is not a blank page
@@ -185,6 +208,7 @@ browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
       .then((results) => {
         // console.log("Security information:", results[0]);
         console.log("Is Secure? - " + results[0].isSecure);
+        isSecure = results[0].isSecure;
       })
       .catch((error) => {
         console.error("Error:", error);
