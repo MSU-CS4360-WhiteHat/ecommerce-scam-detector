@@ -151,13 +151,18 @@ browser.webNavigation.onCompleted.addListener(function (details) {
           .getWeight();
       });
 
-      if (!isSecure && !hasSSLCert) {
-        weight -= (STATIC_RATING ?? 5) * 2;
-      } else if (!isSecure || !hasSSLCert) {
-        weight -= STATIC_RATING ?? 5;
+      if (!isSecure) {
+        weight -= STATIC_RATING;
       }
 
-      localStorage.setItem(domain, JSON.stringify(json));
+      if (!hasSSLCert) {
+        weight -= STATIC_RATING;
+      }
+
+      localStorage.setItem(
+        domain,
+        json.length > 0 ? JSON.stringify(json[0]) : null
+      );
       console.warn(weight);
       // TODO send weight to the popup.
     }).catch((error) => console.error(error));
