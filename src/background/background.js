@@ -136,13 +136,11 @@ browser.webNavigation.onCompleted.addListener(function (details) {
     console.log("Data for " + domain + " is: " + data);
     data = JSON.parse(data);
   } else {
-    if (!debug) {
-      makeWOTRequest(domain, function (json) {
-        console.log(json);
-        localStorage.setItem(domain, json);
-        data = json;
-      });
-    }
+    makeWOTRequest(domain, function (json) {
+      console.log(json);
+      localStorage.setItem(domain, json);
+      data = json;
+    });
   }
 });
 
