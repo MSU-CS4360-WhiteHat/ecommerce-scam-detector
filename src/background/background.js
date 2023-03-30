@@ -84,8 +84,8 @@ async function makeWOTRequest(url, callback) {
 
   headers = {
     // NOTE: Add the API key and user ID here.
-    "x-user-id": "8866427",
-    "x-api-key": "f2b8ef8f223b9943ba9512bc516d375c05a63613",
+    "x-user-id": "",
+    "x-api-key": "",
   };
 
   console.log("Making API request to: " + requestUrl);
