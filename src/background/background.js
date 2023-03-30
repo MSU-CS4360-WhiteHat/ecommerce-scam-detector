@@ -84,8 +84,8 @@ async function makeWOTRequest(url, callback) {
 
   headers = {
     // NOTE: Add the API key and user ID here.
-    "x-user-id": "",
-    "x-api-key": "",
+    "x-user-id": "8866427",
+    "x-api-key": "f2b8ef8f223b9943ba9512bc516d375c05a63613",
   };
 
   console.log("Making API request to: " + requestUrl);
@@ -112,7 +112,7 @@ browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     const domain = domain_from_url(request.url);
     let localStorageData = localStorage.getItem(domain);
     if (localStorageData) {
-      sendResponse({ data: localStorageData });
+      sendResponse({ data: JSON.parse(localStorageData) });
     } else {
       sendResponse({ data: "No data found" });
     }
