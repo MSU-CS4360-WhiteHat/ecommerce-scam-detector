@@ -161,7 +161,10 @@ browser.webNavigation.onCompleted.addListener(function (details) {
 
       localStorage.setItem(
         domain,
-        json.length > 0 ? JSON.stringify(json[0]) : null
+        JSON.stringify({
+          wot: json.length > 0 ? json[0] : null,
+          score: weight,
+        })
       );
       console.warn(weight);
       // TODO send weight to the popup.

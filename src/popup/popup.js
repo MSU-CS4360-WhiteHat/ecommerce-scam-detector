@@ -16,7 +16,8 @@ window.onload = function () {
 };
 
 function updateInfo(data) {
-  data = JSON.parse(data);
+  data = JSON.parse(data).wot;
+  console.log(data);
   const target = data.target;
   const safetyStatus = data.safety.status
     .split("_")
