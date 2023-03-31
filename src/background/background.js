@@ -132,7 +132,7 @@ browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
       .then((tabs) => {
         browser.tabs.sendMessage(tabs[0].id, {
           type: "open_alert",
-          payload: testPayload,
+          payload: payloadForUserPrompt,
         });
       });
   }
@@ -155,6 +155,20 @@ browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 
 // Called when the user navigates to a new page.
 browser.webNavigation.onCompleted.addListener(function (details) {
+  // send a message to the content script to open the alert
+  payloadForUserPrompt.rankNumber = 20;
+  browser.tabs
+    .query({
+      currentWindow: true,
+      active: true,
+    })
+    .then((tabs) => {
+      console.log("Sending message to open alert");
+      browser.tabs.sendMessage(tabs[0].id, {
+        type: "open_alert",
+        payload: payloadForUserPrompt,
+      });
+    });
   console.log("Navigated to: " + details.url);
   const domain = domain_from_url(details.url);
 
