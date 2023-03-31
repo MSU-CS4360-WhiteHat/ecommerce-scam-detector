@@ -106,16 +106,20 @@ async function makeWOTRequest(url, callback) {
   callback(json);
 }
 
+function getData(url) {
+  const domain = domain_from_url(url);
+  let localStorageData = localStorage.getItem(domain);
+  if (localStorageData) {
+    return JSON.parse(localStorageData);
+  } else {
+    return "No data found";
+  }
+}
+
 // listen for a data request from the popup script
 browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   if (request.type == "get_data") {
-    const domain = domain_from_url(request.url);
-    let localStorageData = localStorage.getItem(domain);
-    if (localStorageData) {
-      sendResponse({ data: localStorageData });
-    } else {
-      sendResponse({ data: "No data found" });
-    }
+    sendResponse({ data: getData(request.url) });
   }
 });
 
@@ -161,7 +165,10 @@ browser.webNavigation.onCompleted.addListener(function (details) {
 
       localStorage.setItem(
         domain,
-        json.length > 0 ? JSON.stringify(json[0]) : null
+        JSON.stringify({
+          wot: json.length > 0 ? json[0] : null,
+          score: weight,
+        })
       );
       console.warn(weight);
       // TODO send weight to the popup.
