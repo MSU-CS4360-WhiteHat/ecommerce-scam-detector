@@ -99,7 +99,7 @@ class Evaluate {
     return this;
   }
 
-  setValues(values) {
+  setMultiplierCurve(values) {
     this.values = values;
     return this;
   }
