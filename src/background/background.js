@@ -41,6 +41,11 @@ const Icons = {
   DEFAULT: "default",
 };
 
+const IconThreshold = {
+  SAFE: 80,
+  WARN: 50,
+};
+
 // TODO see if we can make this a state, similar to react states @see https://www.w3schools.com/react/react_state.asp
 let payloadForUserAlert = {
   title: "This site seems unsafe!",
@@ -70,13 +75,23 @@ function sendMessageToTabs(tabs) {
   }
 }
 
-// Sets the extension's icon to the specified color.
-function setIcon(status = "default") {
-  console.debug("setting status to: ", status);
-  try {
-    browser.browserAction.setIcon({ path: "/icons/" + status + ".svg" });
-  } catch (e) {
-    console.log(e);
+function updateIcon(value) {
+  // Sets the extension's icon to the specified color.
+  let setIcon = (status = "default") => {
+    console.debug("setting status to: ", status);
+    try {
+      browser.browserAction.setIcon({ path: "/icons/" + status + ".svg" });
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  if (value >= IconThreshold.SAFE) {
+    setIcon(Icons.SAFE);
+  } else if (IconThreshold.WARN <= value && value < IconThreshold.SAFE) {
+    setIcon(Icons.WARN);
+  } else {
+    setIcon(Icons.UNSAFE);
   }
 }
 
@@ -166,11 +181,10 @@ browser.webNavigation.onCompleted.addListener(function (details) {
           .setWeight(weight)
           .setCategoryId(category.id)
           .setConfidence(category.confidence)
-          .setValues([0, 2, 4, 8]) // if not set, defaults to [0,1,2,3]
+          .setMultiplierCurve([0, 2, 4, 8]) // if not set, defaults to [0,1,2,3]
           .evaluateWeight()
           .getWeight();
       });
-
       if (!isSecure) {
         weight -= STATIC_RATING;
       }
@@ -186,11 +200,13 @@ browser.webNavigation.onCompleted.addListener(function (details) {
           score: weight,
         })
       );
-
-      if (weight <= THRESHOLD_TO_ALERT_THE_USER) {
-        alertUserOfCurrentSite();
-      }
     }).catch((error) => console.error(error));
+
+    updateIcon(weight);
+
+    if (weight <= THRESHOLD_TO_ALERT_THE_USER) {
+      alertUserOfCurrentSite();
+    }
   }
 });
 
