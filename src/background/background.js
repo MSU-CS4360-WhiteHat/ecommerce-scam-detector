@@ -1,5 +1,33 @@
+/*
+---- When we determine the score and reasons it is unsafe use the following
+  
+payloadForUserAlert = {
+    title: "This site seems unsafe!",
+    subTitle: "Our ranking",
+    rankNumber: 43,
+    message: "Here are the reasons this site could be harmful.",
+    reasons: ["Bad", "Awful", "No Good"],
+  };
+
+  or 
+
+  payloadForUserAlert.rankNumber = 43;
+  payloadForUserAlert.reasons = [...];
+
+---- When we want to trigger the alert after we determine an score, use the following
+  
+browser.tabs
+  .query({
+    currentWindow: true,
+  })
+  .then(sendMessageToTabs)
+  .catch(onError);
+
+*/
+
 const debug = true;
 const STATIC_RATING = 5;
+const THRESHOLD_TO_ALERT_THE_USER = 60;
 
 let isSecure = false;
 let hasSSLCert = false;
@@ -14,7 +42,7 @@ const Icons = {
 };
 
 // TODO see if we can make this a state, similar to react states @see https://www.w3schools.com/react/react_state.asp
-let payloadForUserPrompt = {
+let payloadForUserAlert = {
   title: "This site seems unsafe!",
   subTitle: "Our ranking",
   rankNumber: 0,
@@ -30,36 +58,10 @@ function onError(error) {
   console.error(`Error: ${error}`);
 }
 
-/*
----- When we determine the score and reasons it is unsafe use the following
-  
-payloadForUserPrompt = {
-    title: "This site seems unsafe!",
-    subTitle: "Our ranking",
-    rankNumber: 43,
-    message: "Here are the reasons this site could be harmful.",
-    reasons: ["Bad", "Awful", "No Good"],
-  };
-
-  or 
-
-  payloadForUserPrompt.rankNumber = 43;
-  payloadForUserPrompt.reasons = [...];
-
----- When we want to trigger the prompt after we determine an score, use the following
-  
-browser.tabs
-  .query({
-    currentWindow: true,
-  })
-  .then(sendMessageToTabs)
-  .catch(onError);
-
-*/
 function sendMessageToTabs(tabs) {
   for (const tab of tabs) {
     browser.tabs
-      .sendMessage(tab.id, payloadForUserPrompt)
+      .sendMessage(tab.id, payloadForUserAlert)
       .then((response) => {
         console.log("Message from the content script:");
         console.log(response.response);
@@ -116,6 +118,16 @@ function getData(url) {
   }
 }
 
+function alertUserOfCurrentSite() {
+  payloadForUserAlert.rankNumber = weight;
+  browser.tabs
+    .query({
+      currentWindow: true,
+    })
+    .then(sendMessageToTabs)
+    .catch(onError);
+}
+
 // listen for a data request from the popup script
 browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   if (request.type == "get_data") {
@@ -146,6 +158,10 @@ browser.webNavigation.onCompleted.addListener(function (details) {
       localStorageData = json;
       // Iterate through each category and compile weight
       localStorageData[0]?.categories.forEach((category) => {
+        // Build the reasons why and prevent duplicates.
+        if (!payloadForUserAlert.reasons.includes(category?.name)) {
+          payloadForUserAlert.reasons.push(category?.name);
+        }
         weight = new Evaluate()
           .setWeight(weight)
           .setCategoryId(category.id)
@@ -170,8 +186,10 @@ browser.webNavigation.onCompleted.addListener(function (details) {
           score: weight,
         })
       );
-      console.warn(weight);
-      // TODO send weight to the popup.
+
+      if (weight <= THRESHOLD_TO_ALERT_THE_USER) {
+        alertUserOfCurrentSite();
+      }
     }).catch((error) => console.error(error));
   }
 });
