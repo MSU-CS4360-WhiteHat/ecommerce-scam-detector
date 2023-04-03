@@ -35,10 +35,10 @@ app.runtime.onMessage.addListener((request, sender, sendResponse) => {
       type: "alert_opened",
     });
   } else if (request.type === "close_alert") {
+    console.log("closing alert");
     // close the alert
-    iframe.remove();
+    iframe?.remove();
     document.body.style.overflow = "auto";
-    isAlertOpen = false;
 
     // if the user wants to leave the site, redirect them
     if (!request.shouldStay) {

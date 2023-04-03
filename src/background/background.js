@@ -46,6 +46,8 @@ const IconThreshold = {
   WARN: 50,
 };
 
+const EXCLUDE_URLS = ["moz-extension://", "about:", "chrome://", "google.com"];
+
 // TODO see if we can make this a state, similar to react states @see https://www.w3schools.com/react/react_state.asp
 let payloadForUserAlert = {
   title: "This site seems unsafe!",
@@ -65,14 +67,23 @@ function onError(error) {
 
 function sendMessageToTabs(tabs) {
   for (const tab of tabs) {
-    browser.tabs
-      .sendMessage(tab.id, payloadForUserAlert)
-      .then((response) => {
-        console.log("Message from the content script:");
-        console.log(response.response);
-      })
-      .catch(onError);
+    browser.tabs.sendMessage(tab.id, payloadForUserAlert).catch(onError);
   }
+}
+
+function closeAlert(shouldStay = true) {
+  // send a message to the content script to close the alert
+  browser.tabs
+    .query({
+      currentWindow: true,
+      active: true,
+    })
+    .then((tabs) => {
+      browser.tabs.sendMessage(tabs[0].id, {
+        type: "close_alert",
+        shouldStay: shouldStay,
+      });
+    });
 }
 
 function updateIcon(value) {
@@ -86,7 +97,9 @@ function updateIcon(value) {
     }
   };
 
-  if (value >= IconThreshold.SAFE) {
+  if (!value) {
+    setIcon(Icons.DEFAULT);
+  } else if (value >= IconThreshold.SAFE) {
     setIcon(Icons.SAFE);
   } else if (IconThreshold.WARN <= value && value < IconThreshold.SAFE) {
     setIcon(Icons.WARN);
@@ -133,14 +146,24 @@ function getData(url) {
   }
 }
 
-function alertUserOfCurrentSite() {
-  payloadForUserAlert.rankNumber = weight;
+function alertUserOfCurrentSite(data) {
+  payloadForUserAlert.rankNumber = data?.score;
+  payloadForUserAlert.reasons = data?.wot?.categories?.map((category) => {
+    return `${category.name}: ${category.confidence}%`;
+  });
+  console.log(data);
   browser.tabs
     .query({
       currentWindow: true,
+      active: true,
     })
-    .then(sendMessageToTabs)
-    .catch(onError);
+    .then((tabs) => {
+      console.log("Sending message to open alert");
+      browser.tabs.sendMessage(tabs[0].id, {
+        type: "open_alert",
+        payload: payloadForUserAlert,
+      });
+    });
 }
 
 // listen for a data request from the popup script
@@ -159,45 +182,23 @@ browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
       .then((tabs) => {
         browser.tabs.sendMessage(tabs[0].id, {
           type: "open_alert",
-          payload: payloadForUserPrompt,
+          payload: payloadForUserAlert,
         });
       });
   }
 
   if (request.type == "close_alert") {
-    // send a message to the content script to close the alert
-    browser.tabs
-      .query({
-        currentWindow: true,
-        active: true,
-      })
-      .then((tabs) => {
-        browser.tabs.sendMessage(tabs[0].id, {
-          type: "close_alert",
-          shouldStay: request.shouldStay,
-        });
-      });
+    closeAlert(request.shouldStay);
   }
 });
 
-// Called when the user navigates to a new page.
-browser.webNavigation.onCompleted.addListener(function (details) {
-  // send a message to the content script to open the alert
-  payloadForUserPrompt.rankNumber = 20;
-  browser.tabs
-    .query({
-      currentWindow: true,
-      active: true,
-    })
-    .then((tabs) => {
-      console.log("Sending message to open alert");
-      browser.tabs.sendMessage(tabs[0].id, {
-        type: "open_alert",
-        payload: payloadForUserPrompt,
-      });
-    });
-  console.log("Navigated to: " + details.url);
-  const domain = domain_from_url(details.url);
+function handleTabUpdate(url) {
+  if (EXCLUDE_URLS.some((u) => url.includes(u))) {
+    updateIcon();
+    return;
+  }
+  console.log("Navigated to: " + url);
+  const domain = domain_from_url(url);
 
   if (!domain) {
     // No domain found, so just return.
@@ -212,6 +213,7 @@ browser.webNavigation.onCompleted.addListener(function (details) {
     console.log("Site " + domain + " has already been scanned");
     console.log("Data for " + domain + " is: " + localStorageData);
     localStorageData = JSON.parse(localStorageData);
+    weight = localStorageData?.score;
   } else {
     makeWOTRequest(domain, function (json) {
       localStorageData = json;
@@ -245,60 +247,77 @@ browser.webNavigation.onCompleted.addListener(function (details) {
         })
       );
     }).catch((error) => console.error(error));
-
-    updateIcon(weight);
-
-    if (weight <= THRESHOLD_TO_ALERT_THE_USER) {
-      alertUserOfCurrentSite();
-    }
   }
+
+  updateIcon(weight);
+  console.log("Weight for " + domain + " is: " + weight);
+
+  if (weight <= THRESHOLD_TO_ALERT_THE_USER) {
+    if (domain === "www.google.com") {
+      return;
+    }
+    console.warn("Alerting user of current site");
+    alertUserOfCurrentSite(localStorageData);
+  } else {
+    closeAlert();
+  }
+}
+// Called when the user navigates to a new page.
+browser.webNavigation.onCompleted.addListener(async function (details) {
+  handleTabUpdate(details.url);
+});
+
+// Called when the user changes tabs.
+browser.tabs.onActivated.addListener(async function (activeInfo) {
+  const tab = await browser.tabs.get(activeInfo.tabId);
+  handleTabUpdate(tab.url);
 });
 
 // Checks for SSL Certificate on website
 // TODO: do not check on brand new tab
 // TODO: save to local storage?
-browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
-  if (changeInfo.status === "complete") {
-    const url = tab.url;
-    const certificate = await window.crypto.subtle.digest(
-      "SHA-256",
-      new TextEncoder().encode(
-        await fetch(url).then((response) => response.arrayBuffer())
-      )
-    );
+// browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+//   if (changeInfo.status === "complete") {
+//     const url = tab.url;
+//     const certificate = await window.crypto.subtle.digest(
+//       "SHA-256",
+//       new TextEncoder().encode(
+//         await fetch(url).then((response) => response.arrayBuffer())
+//       )
+//     );
 
-    console.log(
-      `The SSL certificate of ${url} is: ${Array.from(
-        new Uint8Array(certificate)
-      )
-        .map((b) => b.toString(16).padStart(2, "0"))
-        .join("")}`
-    );
+//     console.log(
+//       `The SSL certificate of ${url} is: ${Array.from(
+//         new Uint8Array(certificate)
+//       )
+//         .map((b) => b.toString(16).padStart(2, "0"))
+//         .join("")}`
+//     );
 
-    // TODO adjust the hasSSLCert flag here.
-  }
+//     // TODO adjust the hasSSLCert flag here.
+//   }
 
-  // Only run the code if the URL has changed and is not a blank page
-  // Checks getSecurityInfo from browser/chrome API
-  if (changeInfo.url && changeInfo.url !== "about:blank") {
-    // Inject a content script that retrieves the security information
-    browser.tabs
-      .executeScript(tabId, {
-        code: `
-        const protocol = window.location.protocol;
-        const hostname = window.location.hostname;
-        const isSecure = protocol === 'https:';
-        const securityInfo = { isSecure, hostname };
-        securityInfo;
-      `,
-      })
-      .then((results) => {
-        // console.log("Security information:", results[0]);
-        console.log("Is Secure? - " + results[0].isSecure);
-        isSecure = results[0].isSecure;
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
-  }
-});
+//   // Only run the code if the URL has changed and is not a blank page
+//   // Checks getSecurityInfo from browser/chrome API
+//   if (changeInfo.url && changeInfo.url !== "about:blank") {
+//     // Inject a content script that retrieves the security information
+//     browser.tabs
+//       .executeScript(tabId, {
+//         code: `
+//         const protocol = window.location.protocol;
+//         const hostname = window.location.hostname;
+//         const isSecure = protocol === 'https:';
+//         const securityInfo = { isSecure, hostname };
+//         securityInfo;
+//       `,
+//       })
+//       .then((results) => {
+//         // console.log("Security information:", results[0]);
+//         console.log("Is Secure? - " + results[0].isSecure);
+//         isSecure = results[0].isSecure;
+//       })
+//       .catch((error) => {
+//         console.error("Error:", error);
+//       });
+//   }
+// });
