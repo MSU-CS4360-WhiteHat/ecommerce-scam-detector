@@ -267,48 +267,48 @@ browser.tabs.onActivated.addListener(async function (activeInfo) {
 // Checks for SSL Certificate on website
 // TODO: do not check on brand new tab
 // TODO: save to local storage?
-// browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
-//   if (changeInfo.status === "complete") {
-//     const url = tab.url;
-//     const certificate = await window.crypto.subtle.digest(
-//       "SHA-256",
-//       new TextEncoder().encode(
-//         await fetch(url).then((response) => response.arrayBuffer())
-//       )
-//     );
+browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+  if (changeInfo.status === "complete") {
+    const url = tab.url;
+    const certificate = await window.crypto.subtle.digest(
+      "SHA-256",
+      new TextEncoder().encode(
+        await fetch(url).then((response) => response.arrayBuffer())
+      )
+    );
 
-//     console.log(
-//       `The SSL certificate of ${url} is: ${Array.from(
-//         new Uint8Array(certificate)
-//       )
-//         .map((b) => b.toString(16).padStart(2, "0"))
-//         .join("")}`
-//     );
+    console.log(
+      `The SSL certificate of ${url} is: ${Array.from(
+        new Uint8Array(certificate)
+      )
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("")}`
+    );
 
-//     // TODO adjust the hasSSLCert flag here.
-//   }
+    // TODO adjust the hasSSLCert flag here.
+  }
 
-//   // Only run the code if the URL has changed and is not a blank page
-//   // Checks getSecurityInfo from browser/chrome API
-//   if (changeInfo.url && changeInfo.url !== "about:blank") {
-//     // Inject a content script that retrieves the security information
-//     browser.tabs
-//       .executeScript(tabId, {
-//         code: `
-//         const protocol = window.location.protocol;
-//         const hostname = window.location.hostname;
-//         const isSecure = protocol === 'https:';
-//         const securityInfo = { isSecure, hostname };
-//         securityInfo;
-//       `,
-//       })
-//       .then((results) => {
-//         // console.log("Security information:", results[0]);
-//         console.log("Is Secure? - " + results[0].isSecure);
-//         isSecure = results[0].isSecure;
-//       })
-//       .catch((error) => {
-//         console.error("Error:", error);
-//       });
-//   }
-// });
+  // Only run the code if the URL has changed and is not a blank page
+  // Checks getSecurityInfo from browser/chrome API
+  if (changeInfo.url && changeInfo.url !== "about:blank") {
+    // Inject a content script that retrieves the security information
+    browser.tabs
+      .executeScript(tabId, {
+        code: `
+        const protocol = window.location.protocol;
+        const hostname = window.location.hostname;
+        const isSecure = protocol === 'https:';
+        const securityInfo = { isSecure, hostname };
+        securityInfo;
+      `,
+      })
+      .then((results) => {
+        // console.log("Security information:", results[0]);
+        console.log("Is Secure? - " + results[0].isSecure);
+        isSecure = results[0].isSecure;
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  }
+});
