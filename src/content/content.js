@@ -7,6 +7,12 @@ let isAlertOpen = false;
 // the iframe that displays the alert
 let iframe;
 
+// notify the background script that the content script is ready
+app.runtime.sendMessage({
+  type: "tab_loaded",
+  url: window.location.href,
+});
+
 // opens the alert
 function openAlert() {
   if (isAlertOpen) {

@@ -87,6 +87,7 @@ function closeAlert(shouldStay = true) {
 }
 
 function updateIcon(value) {
+  console.log("updating icon with value: ", value);
   // Sets the extension's icon to the specified color.
   let setIcon = (status = "default") => {
     console.debug("setting status to: ", status);
@@ -97,7 +98,7 @@ function updateIcon(value) {
     }
   };
 
-  if (!value) {
+  if (value === undefined) {
     setIcon(Icons.DEFAULT);
   } else if (value >= IconThreshold.SAFE) {
     setIcon(Icons.SAFE);
@@ -108,14 +109,14 @@ function updateIcon(value) {
   }
 }
 
-async function makeWOTRequest(url, callback) {
+async function makeWOTRequest(url) {
   const WOTUrl = "https://scorecard.api.mywot.com/v3/targets?t=";
   const requestUrl = WOTUrl + url;
 
   headers = {
     // NOTE: Add the API key and user ID here.
-    "x-user-id": "8866427",
-    "x-api-key": "f2b8ef8f223b9943ba9512bc516d375c05a63613",
+    "x-user-id": "",
+    "x-api-key": "",
   };
 
   console.log("Making API request to: " + requestUrl);
@@ -133,7 +134,7 @@ async function makeWOTRequest(url, callback) {
   });
   const json = await response.json();
 
-  callback(json);
+  return json;
 }
 
 function getData(url) {
@@ -151,7 +152,6 @@ function alertUserOfCurrentSite(data) {
   payloadForUserAlert.reasons = data?.wot?.categories?.map((category) => {
     return `${category.name}: ${category.confidence}%`;
   });
-  console.log(data);
   browser.tabs
     .query({
       currentWindow: true,
@@ -190,10 +190,16 @@ browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   if (request.type == "close_alert") {
     closeAlert(request.shouldStay);
   }
+
+  if (request.type == "tab_loaded") {
+    console.log("Tab loaded");
+    handleTabUpdate(request.url);
+  }
 });
 
-function handleTabUpdate(url) {
+async function handleTabUpdate(url) {
   if (EXCLUDE_URLS.some((u) => url.includes(u))) {
+    console.log("Excluding URL: " + url);
     updateIcon();
     return;
   }
@@ -211,61 +217,46 @@ function handleTabUpdate(url) {
 
   if (localStorageData) {
     console.log("Site " + domain + " has already been scanned");
-    console.log("Data for " + domain + " is: " + localStorageData);
-    localStorageData = JSON.parse(localStorageData);
-    weight = localStorageData?.score;
+    weight = JSON.parse(localStorageData)?.score;
   } else {
-    makeWOTRequest(domain, function (json) {
-      localStorageData = json;
-      // Iterate through each category and compile weight
-      localStorageData[0]?.categories.forEach((category) => {
-        // Build the reasons why and prevent duplicates.
-        if (!payloadForUserAlert.reasons.includes(category?.name)) {
-          payloadForUserAlert.reasons.push(category?.name);
-        }
-        weight = new Evaluate()
-          .setWeight(weight)
-          .setCategoryId(category.id)
-          .setConfidence(category.confidence)
-          .setMultiplierCurve([0, 2, 4, 8]) // if not set, defaults to [0,1,2,3]
-          .evaluateWeight()
-          .getWeight();
-      });
-      if (!isSecure) {
-        weight -= STATIC_RATING;
-      }
+    const json = await makeWOTRequest(domain);
+    localStorageData = json;
+    // Iterate through each category and compile weight
+    localStorageData[0]?.categories.forEach((category) => {
+      weight = new Evaluate()
+        .setWeight(weight)
+        .setCategoryId(category.id)
+        .setConfidence(category.confidence)
+        .setMultiplierCurve([0, 2, 4, 8]) // if not set, defaults to [0,1,2,3]
+        .evaluateWeight()
+        .getWeight();
+    });
+    if (!isSecure) {
+      weight -= STATIC_RATING;
+    }
 
-      if (!hasSSLCert) {
-        weight -= STATIC_RATING;
-      }
+    if (!hasSSLCert) {
+      weight -= STATIC_RATING;
+    }
 
-      localStorage.setItem(
-        domain,
-        JSON.stringify({
-          wot: json.length > 0 ? json[0] : null,
-          score: weight,
-        })
-      );
-    }).catch((error) => console.error(error));
+    localStorageData = JSON.stringify({
+      wot: json.length > 0 ? json[0] : null,
+      score: weight,
+    });
+
+    localStorage.setItem(domain, localStorageData);
   }
 
   updateIcon(weight);
   console.log("Weight for " + domain + " is: " + weight);
 
   if (weight <= THRESHOLD_TO_ALERT_THE_USER) {
-    if (domain === "www.google.com") {
-      return;
-    }
     console.warn("Alerting user of current site");
-    alertUserOfCurrentSite(localStorageData);
+    alertUserOfCurrentSite(JSON.parse(localStorageData));
   } else {
     closeAlert();
   }
 }
-// Called when the user navigates to a new page.
-browser.webNavigation.onCompleted.addListener(async function (details) {
-  handleTabUpdate(details.url);
-});
 
 // Called when the user changes tabs.
 browser.tabs.onActivated.addListener(async function (activeInfo) {
