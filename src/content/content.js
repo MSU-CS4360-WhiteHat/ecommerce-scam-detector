@@ -36,7 +36,7 @@ function openAlert() {
 // listen for messages from the background script
 app.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.type === "open_alert") {
-    openAlert(request.tabId);
+    openAlert();
     app.runtime.sendMessage({
       type: "alert_opened",
     });
