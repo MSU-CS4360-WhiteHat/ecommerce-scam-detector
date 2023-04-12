@@ -46,6 +46,8 @@ const IconThreshold = {
   WARN: 50,
 };
 
+const EXCLUDE_URLS = ["moz-extension://", "about:", "chrome://", "google.com"];
+
 // TODO see if we can make this a state, similar to react states @see https://www.w3schools.com/react/react_state.asp
 let payloadForUserAlert = {
   title: "This site seems unsafe!",
@@ -65,17 +67,27 @@ function onError(error) {
 
 function sendMessageToTabs(tabs) {
   for (const tab of tabs) {
-    browser.tabs
-      .sendMessage(tab.id, payloadForUserAlert)
-      .then((response) => {
-        console.log("Message from the content script:");
-        console.log(response.response);
-      })
-      .catch(onError);
+    browser.tabs.sendMessage(tab.id, payloadForUserAlert).catch(onError);
   }
 }
 
+function closeAlert(shouldStay = true) {
+  // send a message to the content script to close the alert
+  browser.tabs
+    .query({
+      currentWindow: true,
+      active: true,
+    })
+    .then((tabs) => {
+      browser.tabs.sendMessage(tabs[0].id, {
+        type: "close_alert",
+        shouldStay: shouldStay,
+      });
+    });
+}
+
 function updateIcon(value) {
+  console.log("updating icon with value: ", value);
   // Sets the extension's icon to the specified color.
   let setIcon = (status = "default") => {
     console.debug("setting status to: ", status);
@@ -86,7 +98,9 @@ function updateIcon(value) {
     }
   };
 
-  if (value >= IconThreshold.SAFE) {
+  if (value === undefined) {
+    setIcon(Icons.DEFAULT);
+  } else if (value >= IconThreshold.SAFE) {
     setIcon(Icons.SAFE);
   } else if (IconThreshold.WARN <= value && value < IconThreshold.SAFE) {
     setIcon(Icons.WARN);
@@ -95,7 +109,7 @@ function updateIcon(value) {
   }
 }
 
-async function makeWOTRequest(url, callback) {
+async function makeWOTRequest(url) {
   const WOTUrl = "https://scorecard.api.mywot.com/v3/targets?t=";
   const requestUrl = WOTUrl + url;
 
@@ -120,7 +134,7 @@ async function makeWOTRequest(url, callback) {
   });
   const json = await response.json();
 
-  callback(json);
+  return json;
 }
 
 function getData(url) {
@@ -133,14 +147,23 @@ function getData(url) {
   }
 }
 
-function alertUserOfCurrentSite() {
-  payloadForUserAlert.rankNumber = weight;
+function alertUserOfCurrentSite(data) {
+  payloadForUserAlert.rankNumber = data?.score;
+  payloadForUserAlert.reasons = data?.wot?.categories?.map((category) => {
+    return `${category.name}: ${category.confidence}%`;
+  });
   browser.tabs
     .query({
       currentWindow: true,
+      active: true,
     })
-    .then(sendMessageToTabs)
-    .catch(onError);
+    .then((tabs) => {
+      console.log("Sending message to open alert");
+      browser.tabs.sendMessage(tabs[0].id, {
+        type: "open_alert",
+        payload: payloadForUserAlert,
+      });
+    });
 }
 
 // listen for a data request from the popup script
@@ -148,12 +171,40 @@ browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   if (request.type == "get_data") {
     sendResponse({ data: getData(request.url) });
   }
+
+  if (request.type == "alert_opened") {
+    // send anoter open alert message so the alert.js script can get the data
+    browser.tabs
+      .query({
+        currentWindow: true,
+        active: true,
+      })
+      .then((tabs) => {
+        browser.tabs.sendMessage(tabs[0].id, {
+          type: "open_alert",
+          payload: payloadForUserAlert,
+        });
+      });
+  }
+
+  if (request.type == "close_alert") {
+    closeAlert(request.shouldStay);
+  }
+
+  if (request.type == "tab_loaded") {
+    console.log("Tab loaded");
+    handleTabUpdate(request.url);
+  }
 });
 
-// Called when the user navigates to a new page.
-browser.webNavigation.onCompleted.addListener(function (details) {
-  console.log("Navigated to: " + details.url);
-  const domain = domain_from_url(details.url);
+async function handleTabUpdate(url) {
+  if (EXCLUDE_URLS.some((u) => url.includes(u))) {
+    console.log("Excluding URL: " + url);
+    updateIcon();
+    return;
+  }
+  console.log("Navigated to: " + url);
+  const domain = domain_from_url(url);
 
   if (!domain) {
     // No domain found, so just return.
@@ -166,48 +217,51 @@ browser.webNavigation.onCompleted.addListener(function (details) {
 
   if (localStorageData) {
     console.log("Site " + domain + " has already been scanned");
-    console.log("Data for " + domain + " is: " + localStorageData);
-    localStorageData = JSON.parse(localStorageData);
+    weight = JSON.parse(localStorageData)?.score;
   } else {
-    makeWOTRequest(domain, function (json) {
-      localStorageData = json;
-      // Iterate through each category and compile weight
-      localStorageData[0]?.categories.forEach((category) => {
-        // Build the reasons why and prevent duplicates.
-        if (!payloadForUserAlert.reasons.includes(category?.name)) {
-          payloadForUserAlert.reasons.push(category?.name);
-        }
-        weight = new Evaluate()
-          .setWeight(weight)
-          .setCategoryId(category.id)
-          .setConfidence(category.confidence)
-          .setMultiplierCurve([0, 2, 4, 8]) // if not set, defaults to [0,1,2,3]
-          .evaluateWeight()
-          .getWeight();
-      });
-      if (!isSecure) {
-        weight -= STATIC_RATING;
-      }
-
-      if (!hasSSLCert) {
-        weight -= STATIC_RATING;
-      }
-
-      localStorage.setItem(
-        domain,
-        JSON.stringify({
-          wot: json.length > 0 ? json[0] : null,
-          score: weight,
-        })
-      );
-    }).catch((error) => console.error(error));
-
-    updateIcon(weight);
-
-    if (weight <= THRESHOLD_TO_ALERT_THE_USER) {
-      alertUserOfCurrentSite();
+    const json = await makeWOTRequest(domain);
+    localStorageData = json;
+    // Iterate through each category and compile weight
+    localStorageData[0]?.categories.forEach((category) => {
+      weight = new Evaluate()
+        .setWeight(weight)
+        .setCategoryId(category.id)
+        .setConfidence(category.confidence)
+        .setMultiplierCurve([0, 2, 4, 8]) // if not set, defaults to [0,1,2,3]
+        .evaluateWeight()
+        .getWeight();
+    });
+    if (!isSecure) {
+      weight -= STATIC_RATING;
     }
+
+    if (!hasSSLCert) {
+      weight -= STATIC_RATING;
+    }
+
+    localStorageData = JSON.stringify({
+      wot: json.length > 0 ? json[0] : null,
+      score: weight,
+    });
+
+    localStorage.setItem(domain, localStorageData);
   }
+
+  updateIcon(weight);
+  console.log("Weight for " + domain + " is: " + weight);
+
+  if (weight <= THRESHOLD_TO_ALERT_THE_USER) {
+    console.warn("Alerting user of current site");
+    alertUserOfCurrentSite(JSON.parse(localStorageData));
+  } else {
+    closeAlert();
+  }
+}
+
+// Called when the user changes tabs.
+browser.tabs.onActivated.addListener(async function (activeInfo) {
+  const tab = await browser.tabs.get(activeInfo.tabId);
+  handleTabUpdate(tab.url);
 });
 
 // Checks for SSL Certificate on website
