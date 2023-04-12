@@ -1,123 +1,96 @@
-/* Typography */
-
-html > body > .container > .innercontent > h1,
-html > body > .container > .innercontent > h2 {
-  font-size: 1.8rem;
-}
-
-html > body > .container > .innercontent > h1 {
-  color: whitesmoke;
-  background: #cb4e4e;
-  box-shadow: 0 6px #ab3c3c;
-  width: 100%;
-  padding: 20px 0;
-}
-
-html > body > .container > .innercontent > h1,
-html > body > .container > .innercontent > h2,
-html > body > .container > .innercontent > h3,
-html > body > .container > .innercontent > p {
-  text-align: center;
-  margin: 10px 0 !important;
-}
-
-html > body > .container > .innercontent > h2 {
-  font-size: 4rem;
-  padding: -100px;
-}
-
-html > body > .container > .innercontent > h2 {
-  font-family: "Avant Garde", Avantgarde, "Century Gothic", CenturyGothic,
-    "AppleGothic", sans-serif;
-  font-size: 4rem;
-  margin: -10px 0;
-  /* padding: 80px 50px; */
-  text-align: center;
-  text-transform: uppercase;
-  text-rendering: optimizeLegibility;
-}
-
-html > body > .container > .innercontent > .p {
-  display: flex;
-}
-
-/* Organized List */
-
-html > body > .container > .innercontent > ol {
-  margin: auto 20px;
-  padding: 0 20%;
-  list-style-type: decimal;
-}
-
-/* Containers */
-
-html > body > .container {
+:root {
+  --color-light-red: rgb(203, 78, 78);
+  --color-dark-red: rgb(171, 60, 60);
+  --color-background-red: rgba(77, 0, 0, 0.75);
+  --color-light-blue: rgb(12, 108, 207);
+  --color-dark-blue: rgb(51, 77, 127);
+  --color-white: whitesmoke;
   font-family: Arial, Helvetica, sans-serif;
-  position: fixed;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  right: 0;
-  overflow: hidden;
 }
 
-html > body > .top-container {
-  z-index: 100001;
-  background-color: whitesmoke;
-  max-width: 75vw;
-  max-height: 90vh;
-  min-height: 50vh;
-  border-radius: 0 0 10px 10px;
-  margin: 0 auto;
-  border-top: 0;
+#scam-detector-alert,
+#scam-detector-alert *,
+#scam-detector-alert *::before,
+#scam-detector-alert *::after {
+  box-sizing: border-box;
+}
+
+#scam-detector-alert-iframe {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: 100000;
+  border: none;
+  padding: 6vh 10vw;
+  box-sizing: border-box;
+  box-shadow: inset 0 0 0 1000px var(--color-background-red);
+}
+
+#scam-detector-alert {
+  height: 100%;
+}
+
+#scam-detector-alert body {
+  position: relative;
+  background-color: var(--color-white);
+  padding: 0;
+  margin: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   align-content: center;
+  height: 100%;
 }
 
-html > body > .container > .innercontent {
-  overflow: scroll;
-  width: 100%;
-  margin-bottom: 50px;
-}
-
-/* Backdrop and stop scrolling */
-
-.stop-scrolling {
-  height: 100vw !important;
-  max-height: 100vw !important;
-  min-height: 100vw !important;
-  overflow: hidden !important;
-}
-
-.backdrop {
-  background-color: black;
-  z-index: 100000;
-  opacity: 0.75;
-  min-height: 100vh;
-  min-width: 100vw;
-  backdrop-filter: blur(100px);
-}
-
-/* Buttons */
-
-html > body > .container > .innercontent > .buttons {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-}
-
-html > body > .container > .innercontent > .buttons > .button-container {
+#scam-detector-alert #title {
   display: flex;
-  justify-content: space-evenly;
+  flex-direction: column;
+  align-items: center;
+  align-content: center;
+  justify-content: center;
+  background-color: var(--color-light-red);
+  padding: 30px;
+  color: var(--color-white);
+  box-shadow: 0 10px var(--color-dark-red);
+  width: 100%;
 }
 
-html > body > .container > .innercontent > .buttons > .button-container > .btn {
+#scam-detector-alert #content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#scam-detector-alert #content h2 {
+  font-size: 4rem;
+  font-weight: 700;
+  margin: 0;
+  padding: 0;
+}
+
+#scam-detector-alert #buttons {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  margin: auto 20px 20px 20px;
+  box-sizing: border-box;
+}
+
+#scam-detector-alert #buttons #stay {
+  margin-right: auto;
+  background: var(--color-light-blue);
+  box-shadow: 0 6px var(--color-dark-blue);
+}
+
+#scam-detector-alert #buttons #leave {
+  background: var(--color-light-red);
+  box-shadow: 0 6px var(--color-dark-red);
+}
+
+#scam-detector-alert #buttons button {
   border: none;
   font-family: inherit;
   font-size: inherit;
-  color: inherit;
   background: none;
   cursor: pointer;
   padding: 10px 30px;
@@ -131,122 +104,19 @@ html > body > .container > .innercontent > .buttons > .button-container > .btn {
   -webkit-transition: all 0.3s;
   -moz-transition: all 0.3s;
   transition: all 0.3s;
-}
-
-html
-  > body
-  > .container
-  > .innercontent
-  > .buttons
-  > .button-container
-  > .btn-2 {
-  background: #cb4e4e;
-  color: #fff;
-  box-shadow: 0 6px #ab3c3c;
-  -webkit-transition: none;
-  -moz-transition: none;
   transition: none;
-}
-
-html
-  > body
-  > .container
-  > .innercontent
-  > .buttons
-  > .button-container
-  > .btn-2s {
-  background: #4ecb4e;
-  color: #fff;
-  box-shadow: 0 6px #3fab45;
-  -webkit-transition: none;
-  -moz-transition: none;
-  transition: none;
-}
-
-html
-  > body
-  > .container
-  > .innercontent
-  > .buttons
-  > .button-container
-  > .btn:after {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  -webkit-transition: all 0.3s;
-  -moz-transition: all 0.3s;
-  transition: all 0.3s;
-}
-
-html
-  > body
-  > .container
-  > .innercontent
-  > .buttons
-  > .button-container
-  > .btn-2a,
-html
-  > body
-  > .container
-  > .innercontent
-  > .buttons
-  > .button-container
-  > .btn-2as {
   border-radius: 0 0 5px 5px;
+  color: #fff;
 }
 
-html
-  > body
-  > .container
-  > .innercontent
-  > .buttons
-  > .button-container
-  > .btn-2a:hover,
-html
-  > body
-  > .container
-  > .innercontent
-  > .buttons
-  > .button-container
-  > .btn-2as:hover {
+#scam-detector-alert #buttons button:hover {
   top: 2px;
 }
 
-html
-  > body
-  > .container
-  > .innercontent
-  > .buttons
-  > .button-container
-  > .btn-2a:hover {
-  box-shadow: 0 4px #ab3c3c;
+#scam-detector-alert #buttons #stay:hover {
+  box-shadow: 0 4px var(--color-dark-blue);
 }
 
-html
-  > body
-  > .container
-  > .innercontent
-  > .buttons
-  > .button-container
-  > .btn-2as:hover {
-  box-shadow: 0 4px #3fab45;
-  top: 2px;
-}
-
-html
-  > body
-  > .container
-  > .innercontent
-  > .buttons
-  > .button-container
-  > .btn-2a:active,
-html
-  > body
-  > .container
-  > .innercontent
-  > .buttons
-  > .button-container
-  > .btn-2as:active {
-  box-shadow: 0 0 #ab3c3c;
-  top: 6px;
+#scam-detector-alert #buttons #leave:hover {
+  box-shadow: 0 4px var(--color-dark-red);
 }
