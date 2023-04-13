@@ -265,8 +265,6 @@ browser.tabs.onActivated.addListener(async function (activeInfo) {
 });
 
 // Checks for SSL Certificate on website
-// TODO: do not check on brand new tab
-// TODO: save to local storage?
 browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   if (changeInfo.status === "complete") {
     const url = tab.url;
