@@ -115,8 +115,8 @@ async function makeWOTRequest(url) {
 
   headers = {
     // NOTE: Add the API key and user ID here.
-    "x-user-id": "8866427",
-    "x-api-key": "f2b8ef8f223b9943ba9512bc516d375c05a63613",
+    "x-user-id": "",
+    "x-api-key": "",
   };
 
   console.log("Making API request to: " + requestUrl);
@@ -265,8 +265,6 @@ browser.tabs.onActivated.addListener(async function (activeInfo) {
 });
 
 // Checks for SSL Certificate on website
-// TODO: do not check on brand new tab
-// TODO: save to local storage?
 browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   if (changeInfo.status === "complete") {
     const url = tab.url;
