@@ -29,10 +29,11 @@ const debug = true;
 const STATIC_RATING = 5;
 const THRESHOLD_TO_ALERT_THE_USER = 60;
 
+const X_USER_ID = "";
+const X_API_KEY = "";
+
 let isSecure = false;
 let hasSSLCert = false;
-
-let weight = 100; // we can rename to score.
 
 const Icons = {
   SAFE: "safe",
@@ -115,8 +116,8 @@ async function makeWOTRequest(url) {
 
   headers = {
     // NOTE: Add the API key and user ID here.
-    "x-user-id": "",
-    "x-api-key": "",
+    "x-user-id": X_USER_ID,
+    "x-api-key": X_API_KEY,
   };
 
   console.log("Making API request to: " + requestUrl);
@@ -193,11 +194,14 @@ browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 
   if (request.type == "tab_loaded") {
     console.log("Tab loaded");
-    handleTabUpdate(request.url);
+    const debug = new URL(request.url).searchParams.get("debug") ?? false;
+    handleTabUpdate(request.url, debug);
   }
 });
 
-async function handleTabUpdate(url) {
+async function handleTabUpdate(url, debug = false) {
+  let weight = 100;
+
   if (EXCLUDE_URLS.some((u) => url.includes(u))) {
     console.log("Excluding URL: " + url);
     updateIcon();
@@ -215,10 +219,13 @@ async function handleTabUpdate(url) {
 
   let localStorageData = localStorage.getItem(domain);
 
-  if (localStorageData) {
+  if (localStorageData && !debug) {
     console.log("Site " + domain + " has already been scanned");
     weight = JSON.parse(localStorageData)?.score;
+    console.warn("weight " + weight);
   } else {
+    weight = 100;
+    console.log("Making a WOT call");
     const json = await makeWOTRequest(domain);
     localStorageData = json;
     // Iterate through each category and compile weight
@@ -230,7 +237,10 @@ async function handleTabUpdate(url) {
         .setMultiplierCurve([0, 2, 4, 8]) // if not set, defaults to [0,1,2,3]
         .evaluateWeight()
         .getWeight();
+
+      console.info("Weight is: " + weight);
     });
+
     if (!isSecure) {
       weight -= STATIC_RATING;
     }
@@ -238,6 +248,8 @@ async function handleTabUpdate(url) {
     if (!hasSSLCert) {
       weight -= STATIC_RATING;
     }
+
+    // TODO if has car and no SSL Ding them even more.
 
     localStorageData = JSON.stringify({
       wot: json.length > 0 ? json[0] : null,
