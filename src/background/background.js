@@ -195,6 +195,7 @@ browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 
 async function handleTabUpdate(url, debug = false) {
   let weight = 100;
+  let notSafe = false;
 
   if (EXCLUDE_URLS.some((u) => url.includes(u))) {
     updateIcon();
@@ -221,18 +222,15 @@ async function handleTabUpdate(url, debug = false) {
     localStorageData = json;
     // Iterate through each category and compile weight
     localStorageData[0]?.categories.forEach((category) => {
-      // TODO
-      // If one of the categories is sever, we should set the notSafe flag in the evaluator to true
-      // and show the popup regardless of weight.
-
       let evaluator = new Evaluate()
         .setWeight(weight)
         .setCategoryId(category.id)
         .setConfidence(category.confidence)
-        .setMultiplierCurve([0, 2, 4, 8]) // if not set, defaults to [0,1,2,3]
+        .setMultiplierCurve([0, 2, 8, 16]) // if not set, defaults to [0,1,2,3]
         .evaluateWeight();
-      weight = evaluator.getWeight();
 
+      weight = evaluator.getWeight();
+      notSafe = notSafe === true ? true : evaluator.notSafe;
       console.info("Weight is: " + weight);
     });
 
@@ -244,7 +242,12 @@ async function handleTabUpdate(url, debug = false) {
       weight -= STATIC_RATING;
     }
 
-    // TODO if has car and no SSL Ding them even more.
+    // TODO if has cart and no SSL Ding them even more. Add a category that says has cart but not secure.
+    // if ((!hasSSLCert || !isSecure) && hasCart) {
+    //   weight -= STATIC_RATING * 10;
+    // }
+
+    weight = weight >= 0 ? weight : 0;
 
     localStorageData = JSON.stringify({
       wot: json.length > 0 ? json[0] : null,
@@ -256,7 +259,7 @@ async function handleTabUpdate(url, debug = false) {
 
   updateIcon(weight);
 
-  if (evaluator.notSafe || weight <= THRESHOLD_TO_ALERT_THE_USER) {
+  if (notSafe || weight <= THRESHOLD_TO_ALERT_THE_USER) {
     console.warn("Alerting user of current site");
     alertUserOfCurrentSite(JSON.parse(localStorageData));
   } else {
@@ -307,8 +310,6 @@ browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
       `,
       })
       .then((results) => {
-        //
-
         isSecure = results[0].isSecure;
       })
       .catch((error) => {

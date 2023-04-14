@@ -1,17 +1,19 @@
-// Use this to adjust the potency of each ratting.
-const DEFAULT_RISK_SCALE = [0, 1, 2, 3];
-
 // Generic ratting
 const NO_IMPACT = 0;
 const MILD_IMPACT = 1;
 const MODERATE_IMPACT = 2;
 const SEVERE_IMPACT = 3;
 
-const WOT_RATING = {
-  100: SEVERE_IMPACT,
-  200: MODERATE_IMPACT,
-  300: MILD_IMPACT,
-  500: NO_IMPACT,
+// Use this to adjust the potency of each ratting.
+const DEFAULT_RISK_SCALE = [0, 2, 4, 6];
+
+let evalNotSafe = false;
+
+let WOT_RATING = {
+  100: DEFAULT_RISK_SCALE[SEVERE_IMPACT],
+  200: DEFAULT_RISK_SCALE[MODERATE_IMPACT],
+  300: DEFAULT_RISK_SCALE[MILD_IMPACT],
+  500: DEFAULT_RISK_SCALE[NO_IMPACT],
 };
 
 const GRADE = {
@@ -92,17 +94,16 @@ class Evaluate {
     return this;
   }
 
-  setWotValues(values = DEFAULT_RISK_SCALE) {
-    this.values[500] = values[0];
-    this.values[300] = values[1];
-    this.values[200] = values[2];
-    this.values[100] = values[3];
+  setMultiplierCurve(values = DEFAULT_RISK_SCALE) {
+    this.values[500] = values[NO_IMPACT];
+    this.values[300] = values[MILD_IMPACT];
+    this.values[200] = values[MODERATE_IMPACT];
+    this.values[100] = values[SEVERE_IMPACT];
 
-    return this;
-  }
-
-  setMultiplierCurve(values) {
-    this.values = values;
+    WOT_RATING[500] = values[NO_IMPACT];
+    WOT_RATING[300] = values[MILD_IMPACT];
+    WOT_RATING[200] = values[MODERATE_IMPACT];
+    WOT_RATING[100] = values[SEVERE_IMPACT];
     return this;
   }
 
@@ -130,11 +131,11 @@ class Evaluate {
    */
   evaluateWeight() {
     const multiplier = this.multiplier(this.confidence);
-    const deduction = this.rating(this.categoryId, this.values);
+    const deduction = this.rating(this.categoryId);
     const change = deduction * multiplier;
 
+    this.notSafe = evalNotSafe;
     this.weight -= change;
-    this.weight = this.weight > 0 ? this.weight : 0;
 
     return this;
   }
