@@ -28,24 +28,17 @@ const GRADE = {
  * @returns
  */
 const getGradeMultiplier = (value) => {
-  console.debug("grade is: " + value);
   if (value <= GRADE.F) {
-    console.debug("un-ranked grade, return 1");
     return 1;
   } else if (GRADE.F < value && value <= GRADE.D) {
-    console.debug("grade F, return 2");
     return 2;
   } else if (GRADE.D < value && value <= GRADE.C) {
-    console.debug("grade D, return 3");
     return 3;
   } else if (GRADE.C < value && value <= GRADE.B) {
-    console.debug("grade C, return 4");
     return 4;
   } else if (GRADE.B < value && value <= GRADE.A) {
-    console.debug("grade B, return 5");
     return 5;
   } else if (GRADE.A < value) {
-    console.debug("grade A, return 6");
     return 6;
   }
   console.error("Something in the grade evaluation went wrong");
@@ -58,7 +51,6 @@ const getGradeMultiplier = (value) => {
  * @returns
  */
 const getWotRating = (value) => {
-  console.debug("WOT Rating is: " + value);
   if (value >= 500) {
     return WOT_RATING[500];
   } else if (300 <= value && value < 400) {
@@ -125,7 +117,6 @@ class Evaluate {
   }
 
   getWeight() {
-    console.warn("RETURNING WEIGHT: " + this.weight);
     return this.weight;
   }
 
@@ -138,22 +129,12 @@ class Evaluate {
    * @returns
    */
   evaluateWeight() {
-    console.warn("WEIGHT BEFORE: " + this.weight);
-
-    console.log("Confidence is: " + this.confidence);
-
     const multiplier = this.multiplier(this.confidence);
-    console.debug("multiplier is: " + multiplier);
-
     const deduction = this.rating(this.categoryId, this.values);
-    console.debug("deduction is: " + deduction);
-
     const change = deduction * multiplier;
-    console.debug("change is: " + change);
 
     this.weight -= change;
     this.weight = this.weight > 0 ? this.weight : 0;
-    console.warn("WEIGHT AFTER: " + this.weight);
 
     return this;
   }

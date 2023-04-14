@@ -88,14 +88,12 @@ function closeAlert(shouldStay = true) {
 }
 
 function updateIcon(value) {
-  console.log("updating icon with value: ", value);
   // Sets the extension's icon to the specified color.
   let setIcon = (status = "default") => {
-    console.debug("setting status to: ", status);
     try {
       browser.browserAction.setIcon({ path: "/icons/" + status + ".svg" });
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
   };
 
@@ -119,8 +117,6 @@ async function makeWOTRequest(url) {
     "x-user-id": X_USER_ID,
     "x-api-key": X_API_KEY,
   };
-
-  console.log("Making API request to: " + requestUrl);
 
   /**
    * In summary, use await fetch() when you need to perform some operation with the data obtained
@@ -159,7 +155,6 @@ function alertUserOfCurrentSite(data) {
       active: true,
     })
     .then((tabs) => {
-      console.log("Sending message to open alert");
       browser.tabs.sendMessage(tabs[0].id, {
         type: "open_alert",
         payload: payloadForUserAlert,
@@ -193,7 +188,6 @@ browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   }
 
   if (request.type == "tab_loaded") {
-    console.log("Tab loaded");
     const debug = new URL(request.url).searchParams.get("debug") ?? false;
     handleTabUpdate(request.url, debug);
   }
@@ -203,29 +197,26 @@ async function handleTabUpdate(url, debug = false) {
   let weight = 100;
 
   if (EXCLUDE_URLS.some((u) => url.includes(u))) {
-    console.log("Excluding URL: " + url);
     updateIcon();
     return;
   }
-  console.log("Navigated to: " + url);
+
   const domain = domain_from_url(url);
 
   if (!domain) {
     // No domain found, so just return.
-    console.log("No domain found, so just return.");
+
     return 1;
   }
-  console.log("Getting data from local storage for: " + domain);
 
   let localStorageData = localStorage.getItem(domain);
 
   if (localStorageData && !debug) {
-    console.log("Site " + domain + " has already been scanned");
     weight = JSON.parse(localStorageData)?.score;
     console.warn("weight " + weight);
   } else {
     weight = 100;
-    console.log("Making a WOT call");
+
     const json = await makeWOTRequest(domain);
     localStorageData = json;
     // Iterate through each category and compile weight
@@ -260,7 +251,6 @@ async function handleTabUpdate(url, debug = false) {
   }
 
   updateIcon(weight);
-  console.log("Weight for " + domain + " is: " + weight);
 
   if (weight <= THRESHOLD_TO_ALERT_THE_USER) {
     console.warn("Alerting user of current site");
@@ -313,8 +303,8 @@ browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
       `,
       })
       .then((results) => {
-        // console.log("Security information:", results[0]);
-        console.log("Is Secure? - " + results[0].isSecure);
+        //
+
         isSecure = results[0].isSecure;
       })
       .catch((error) => {
