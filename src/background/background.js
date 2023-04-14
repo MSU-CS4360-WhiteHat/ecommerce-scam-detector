@@ -221,13 +221,17 @@ async function handleTabUpdate(url, debug = false) {
     localStorageData = json;
     // Iterate through each category and compile weight
     localStorageData[0]?.categories.forEach((category) => {
-      weight = new Evaluate()
+      // TODO
+      // If one of the categories is sever, we should set the notSafe flag in the evaluator to true
+      // and show the popup regardless of weight.
+
+      let evaluator = new Evaluate()
         .setWeight(weight)
         .setCategoryId(category.id)
         .setConfidence(category.confidence)
         .setMultiplierCurve([0, 2, 4, 8]) // if not set, defaults to [0,1,2,3]
-        .evaluateWeight()
-        .getWeight();
+        .evaluateWeight();
+      weight = evaluator.getWeight();
 
       console.info("Weight is: " + weight);
     });
@@ -252,7 +256,7 @@ async function handleTabUpdate(url, debug = false) {
 
   updateIcon(weight);
 
-  if (weight <= THRESHOLD_TO_ALERT_THE_USER) {
+  if (evaluator.notSafe || weight <= THRESHOLD_TO_ALERT_THE_USER) {
     console.warn("Alerting user of current site");
     alertUserOfCurrentSite(JSON.parse(localStorageData));
   } else {
