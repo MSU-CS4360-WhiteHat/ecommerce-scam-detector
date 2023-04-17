@@ -29,10 +29,11 @@ const debug = true;
 const STATIC_RATING = 5;
 const THRESHOLD_TO_ALERT_THE_USER = 60;
 
+const X_USER_ID = "";
+const X_API_KEY = "";
+
 let isSecure = false;
 let hasSSLCert = false;
-
-let weight = 100; // we can rename to score.
 
 const Icons = {
   SAFE: "safe",
@@ -87,14 +88,12 @@ function closeAlert(shouldStay = true) {
 }
 
 function updateIcon(value) {
-  console.log("updating icon with value: ", value);
   // Sets the extension's icon to the specified color.
   let setIcon = (status = "default") => {
-    console.debug("setting status to: ", status);
     try {
       browser.browserAction.setIcon({ path: "/icons/" + status + ".svg" });
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
   };
 
@@ -115,11 +114,9 @@ async function makeWOTRequest(url) {
 
   headers = {
     // NOTE: Add the API key and user ID here.
-    "x-user-id": "",
-    "x-api-key": "",
+    "x-user-id": X_USER_ID,
+    "x-api-key": X_API_KEY,
   };
-
-  console.log("Making API request to: " + requestUrl);
 
   /**
    * In summary, use await fetch() when you need to perform some operation with the data obtained
@@ -158,7 +155,6 @@ function alertUserOfCurrentSite(data) {
       active: true,
     })
     .then((tabs) => {
-      console.log("Sending message to open alert");
       browser.tabs.sendMessage(tabs[0].id, {
         type: "open_alert",
         payload: payloadForUserAlert,
@@ -192,45 +188,52 @@ browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   }
 
   if (request.type == "tab_loaded") {
-    console.log("Tab loaded");
-    handleTabUpdate(request.url);
+    const debug = new URL(request.url).searchParams.get("debug") ?? false;
+    handleTabUpdate(request.url, debug);
   }
 });
 
-async function handleTabUpdate(url) {
+async function handleTabUpdate(url, debug = false) {
+  let weight = 100;
+  let notSafe = false;
+
   if (EXCLUDE_URLS.some((u) => url.includes(u))) {
-    console.log("Excluding URL: " + url);
     updateIcon();
     return;
   }
-  console.log("Navigated to: " + url);
+
   const domain = domain_from_url(url);
 
   if (!domain) {
     // No domain found, so just return.
-    console.log("No domain found, so just return.");
+
     return 1;
   }
-  console.log("Getting data from local storage for: " + domain);
 
   let localStorageData = localStorage.getItem(domain);
 
-  if (localStorageData) {
-    console.log("Site " + domain + " has already been scanned");
+  if (localStorageData && !debug) {
     weight = JSON.parse(localStorageData)?.score;
+    console.warn("weight " + weight);
   } else {
+    weight = 100;
+
     const json = await makeWOTRequest(domain);
     localStorageData = json;
     // Iterate through each category and compile weight
     localStorageData[0]?.categories.forEach((category) => {
-      weight = new Evaluate()
+      let evaluator = new Evaluate()
         .setWeight(weight)
         .setCategoryId(category.id)
         .setConfidence(category.confidence)
-        .setMultiplierCurve([0, 2, 4, 8]) // if not set, defaults to [0,1,2,3]
-        .evaluateWeight()
-        .getWeight();
+        .setMultiplierCurve([0, 2, 8, 16]) // if not set, defaults to [0,1,2,3]
+        .evaluateWeight();
+
+      weight = evaluator.getWeight();
+      notSafe = notSafe === true ? true : evaluator.notSafe;
+      console.info("Weight is: " + weight);
     });
+
     if (!isSecure) {
       weight -= STATIC_RATING;
     }
@@ -238,6 +241,13 @@ async function handleTabUpdate(url) {
     if (!hasSSLCert) {
       weight -= STATIC_RATING;
     }
+
+    // TODO if has cart and no SSL Ding them even more. Add a category that says has cart but not secure.
+    // if ((!hasSSLCert || !isSecure) && hasCart) {
+    //   weight -= STATIC_RATING * 10;
+    // }
+
+    weight = weight >= 0 ? weight : 0;
 
     localStorageData = JSON.stringify({
       wot: json.length > 0 ? json[0] : null,
@@ -248,9 +258,8 @@ async function handleTabUpdate(url) {
   }
 
   updateIcon(weight);
-  console.log("Weight for " + domain + " is: " + weight);
 
-  if (weight <= THRESHOLD_TO_ALERT_THE_USER) {
+  if (notSafe || weight <= THRESHOLD_TO_ALERT_THE_USER) {
     console.warn("Alerting user of current site");
     alertUserOfCurrentSite(JSON.parse(localStorageData));
   } else {
@@ -301,8 +310,6 @@ browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
       `,
       })
       .then((results) => {
-        // console.log("Security information:", results[0]);
-        console.log("Is Secure? - " + results[0].isSecure);
         isSecure = results[0].isSecure;
       })
       .catch((error) => {
