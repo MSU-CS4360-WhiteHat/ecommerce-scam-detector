@@ -28,6 +28,8 @@ browser.tabs
 const debug = true;
 const STATIC_RATING = 5;
 const THRESHOLD_TO_ALERT_THE_USER = 60;
+const RETENTION_PERIOD = 1000 * 60 * 60 * 24 * 7; // 7 days
+const NUM_ITEMS_TO_STORE = 50; // once it goes over 150 we purge to 100
 
 const X_USER_ID = "";
 const X_API_KEY = "";
@@ -162,6 +164,37 @@ function alertUserOfCurrentSite(data) {
     });
 }
 
+function checkExpired(date) {
+  const now = new Date();
+  const old = new Date(date);
+  const diff = now.getTime() - old.getTime();
+  return diff > RETENTION_PERIOD;
+}
+
+function purgeStorage() {
+  const numItems = localStorage.length;
+  if (numItems > NUM_ITEMS_TO_STORE) {
+    console.log("Max number of items reached, removing 50 oldest items.");
+    // remove the 50 oldest items, sorting by the 'date' value
+    const items = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      const value = JSON.parse(localStorage.getItem(key));
+      items.push({ key: key, date: new Date(value.date) });
+    }
+
+    // sort by date
+    items.sort((a, b) => {
+      return a.date - b.date;
+    });
+
+    // remove the first 50 items
+    for (let i = 0; i < 1; i++) {
+      localStorage.removeItem(items[i].key);
+    }
+  }
+}
+
 // listen for a data request from the popup script
 browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   if (request.type == "get_data") {
@@ -212,10 +245,24 @@ async function handleTabUpdate(url, debug = false) {
 
   let localStorageData = localStorage.getItem(domain);
 
+  let shouldUpdate = false;
   if (localStorageData && !debug) {
-    weight = JSON.parse(localStorageData)?.score;
-    console.warn("weight " + weight);
+    data = JSON.parse(localStorageData);
+    weight = data?.score;
+
+    // Check if the data has expired
+    if (localStorageData) {
+      if (checkExpired(data?.date)) {
+        localStorage.removeItem(domain);
+        localStorageData = null;
+        shouldUpdate = true;
+      }
+    }
   } else {
+    shouldUpdate = true;
+  }
+
+  if (shouldUpdate) {
     weight = 100;
 
     const json = await makeWOTRequest(domain);
@@ -250,6 +297,7 @@ async function handleTabUpdate(url, debug = false) {
     weight = weight >= 0 ? weight : 0;
 
     localStorageData = JSON.stringify({
+      date: new Date().toISOString(),
       wot: json.length > 0 ? json[0] : null,
       score: weight,
     });
@@ -265,6 +313,8 @@ async function handleTabUpdate(url, debug = false) {
   } else {
     closeAlert();
   }
+
+  purgeStorage();
 }
 
 // Called when the user changes tabs.
