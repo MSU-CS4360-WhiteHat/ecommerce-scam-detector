@@ -352,9 +352,9 @@ browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
     browser.tabs
       .executeScript(tabId, {
         code: `
-        const protocol = window.location.protocol;
+        const p = window.location.protocol;
         const hostname = window.location.hostname;
-        const isSecure = protocol === 'https:';
+        const isSecure = p === 'https:';
         const securityInfo = { isSecure, hostname };
         securityInfo;
       `,
