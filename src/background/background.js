@@ -29,7 +29,7 @@ const debug = true;
 const STATIC_RATING = 5;
 const THRESHOLD_TO_ALERT_THE_USER = 60;
 const RETENTION_PERIOD = 1000 * 60 * 60 * 24 * 7; // 7 days
-const NUM_ITEMS_TO_STORE = 50; // once it goes over 150 we purge to 100
+const NUM_ITEMS_TO_STORE = 150; // once it goes over 150 we purge to 100
 
 const X_USER_ID = "";
 const X_API_KEY = "";
