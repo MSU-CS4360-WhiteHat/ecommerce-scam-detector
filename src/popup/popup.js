@@ -16,19 +16,32 @@ window.onload = function () {
 };
 
 function updateInfo(data) {
-  data = JSON.parse(data);
-  const target = data.target;
-  const safetyStatus = data.safety.status
+  let score = data?.score;
+  let wot = data?.wot;
+
+  if (!wot) {
+    console.error("Missing WOT ratings");
+  }
+
+  const target = wot?.target;
+  const safetyStatus = wot?.safety?.status
     .split("_")
     .map((word) => word[0] + word.slice(1).toLowerCase())
     .join(" ");
-  const reputation = data.safety.reputations;
-  const childSafety = data.childSafety.reputations;
-  const otherInfo = data.categories.map((category) => {
-    return category.name + ": " + category.confidence + "%";
+  const reputation = wot?.safety?.reputations;
+  const childSafety = wot?.childSafety?.reputations;
+  const otherInfo = wot?.categories.map((category) => {
+    return category?.name + ": " + category?.confidence + "%";
   });
 
   let li = null;
+
+  if (score) {
+    li = document.createElement("li");
+    li.textContent = "Score: " + score;
+    siteInfo.appendChild(li);
+  }
+
   if (target) {
     li = document.createElement("li");
     li.innerHTML = "Site: " + target;
